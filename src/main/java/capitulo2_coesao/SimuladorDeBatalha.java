@@ -18,6 +18,8 @@ import java.util.List;
 public class SimuladorDeBatalha {
 
     public static void main(String[] args) {
+        infra.Console.consertarAcentuacao();
+
         System.out.println("🐺 INICIANDO O TREINAMENTO DE REFATORAÇÃO...\n");
 
         testarV1_AStriga();
