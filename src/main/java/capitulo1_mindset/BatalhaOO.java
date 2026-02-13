@@ -50,8 +50,8 @@ class Geralt {
 public class BatalhaOO {
     public static void main(String[] args) {
         Grifo real = new Grifo();
-        EspadaDePrata aerongight = new EspadaDePrata();
-        Geralt loboBranco = new Geralt(aerongight);
+        EspadaDePrata aerondight = new EspadaDePrata();
+        Geralt loboBranco = new Geralt(aerondight);
 
         loboBranco.cacar(real);
     }
