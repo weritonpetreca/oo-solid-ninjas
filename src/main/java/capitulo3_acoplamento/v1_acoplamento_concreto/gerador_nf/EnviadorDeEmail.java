@@ -1,4 +1,4 @@
-package capitulo3_acoplamento.v1_acoplamento_concreto;
+package capitulo3_acoplamento.v1_acoplamento_concreto.gerador_nf;
 
 /**
  * Uma ferramenta concreta: O Pombo-Correio específico.
@@ -9,7 +9,7 @@ package capitulo3_acoplamento.v1_acoplamento_concreto;
  */
 
 public class EnviadorDeEmail {
-    public void envia(NotaFiscal nf) {
+    public void enviaEmail(NotaFiscal nf) {
         System.out.println("Enviando email com a NF...");
     }
 }

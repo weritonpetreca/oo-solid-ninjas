@@ -1,4 +1,4 @@
-package capitulo3_acoplamento.v2_inversao_dependencia;
+package capitulo3_acoplamento.v2_inversao_dependencia.gerador_nf;
 
 /**
  * O Mestre Bruxo que domina o DIP (Princípio da Inversão de Dependência).
@@ -26,9 +26,12 @@ public class GeradorDeNotaFiscal {
         this.acoes = acoes;
     }
 
-    public NotaFiscal gera(double valor) {
-        double imposto = valor * 0.06;
-        NotaFiscal nf = new NotaFiscal(valor, imposto);
+    public NotaFiscal gera(Fatura fatura) {
+
+        double valor = fatura.getValorMensal();
+
+        NotaFiscal nf = new NotaFiscal(valor,
+                impostoSimplesSobreO(valor));
 
         // O Loop Polimórfico:
         // Executa todas as ações sem saber quais são.
@@ -37,5 +40,9 @@ public class GeradorDeNotaFiscal {
         }
 
         return nf;
+    }
+
+    private double impostoSimplesSobreO(double valor) {
+        return valor * 0.06;
     }
 }

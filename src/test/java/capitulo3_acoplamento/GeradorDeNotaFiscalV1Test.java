@@ -1,9 +1,6 @@
 package capitulo3_acoplamento;
 
-import capitulo3_acoplamento.v1_acoplamento_concreto.EnviadorDeEmail;
-import capitulo3_acoplamento.v1_acoplamento_concreto.GeradorDeNotaFiscal;
-import capitulo3_acoplamento.v1_acoplamento_concreto.NotaFiscal;
-import capitulo3_acoplamento.v1_acoplamento_concreto.NotaFiscalDao;
+import capitulo3_acoplamento.v1_acoplamento_concreto.gerador_nf.*;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -23,10 +20,12 @@ public class GeradorDeNotaFiscalV1Test {
         // O acoplamento nos força a lidar com essas classes específicas
         GeradorDeNotaFiscal gerador = new GeradorDeNotaFiscal(emailMock, daoMock);
 
-        NotaFiscal nf = gerador.gera(1000.0);
+        Fatura fatura = new Fatura("Geralt", 1000.0);
+
+        NotaFiscal nf = gerador.gera(fatura);
 
         // Verifica se chamou os métodos das classes concretas
-        verify(emailMock).envia(nf);
+        verify(emailMock).enviaEmail(nf);
         verify(daoMock).persiste(nf);
     }
 }

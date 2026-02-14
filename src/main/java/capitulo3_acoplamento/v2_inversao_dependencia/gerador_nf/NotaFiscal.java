@@ -1,4 +1,4 @@
-package capitulo3_acoplamento.v2_inversao_dependencia;
+package capitulo3_acoplamento.v2_inversao_dependencia.gerador_nf;
 
 /**
  * O mesmo Troféu (Domínio), mas agora utilizado num contexto desacoplado.

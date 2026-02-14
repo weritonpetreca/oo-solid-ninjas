@@ -1,9 +1,6 @@
 package capitulo3_acoplamento;
 
-import capitulo3_acoplamento.v2_inversao_dependencia.AcaoAposGerarNota;
-import capitulo3_acoplamento.v2_inversao_dependencia.EnviadorDeSMS;
-import capitulo3_acoplamento.v2_inversao_dependencia.GeradorDeNotaFiscal;
-import capitulo3_acoplamento.v2_inversao_dependencia.NotaFiscal;
+import capitulo3_acoplamento.v2_inversao_dependencia.gerador_nf.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -11,8 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.List;
-
-
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
@@ -37,7 +32,8 @@ public class GeradorDeNotaFiscalV2Test {
         GeradorDeNotaFiscal gerador = new GeradorDeNotaFiscal(acoes);
 
         // 2. AÇÃO (Act)
-        NotaFiscal nf = gerador.gera(1000.0);
+        Fatura fatura = new Fatura("Yennefer", 1000.0);
+        NotaFiscal nf = gerador.gera(fatura);
 
         // 3. VERIFICAÇÃO (Assert)
 

@@ -4,52 +4,67 @@
 
 Neste capítulo, saímos das muralhas internas da classe (Coesão) para observar como elas interagem entre si (Acoplamento). Aprendemos que depender de classes concretas é como casar com um monstro específico: quando ele muda, você sofre.
 
-Acompanhe a evolução da nossa arquitetura:
-
-## 📂 v1_acoplamento_concreto
-
-**O Problema (Amor Tóxico):** O `GeradorDeNotaFiscal` exigia parceiros específicos.
-* O construtor pedia explicitamente `EnviadorDeEmail` e `NotaFiscalDao`.
-* **Risco:** Se precisássemos trocar o E-mail por SMS, ou o DAO por um Arquivo, o Gerador teria que ser operado (modificado).
-* **Violação:** O código de alto nível (Regra de Negócio) dependia de detalhes de baixo nível (Infraestrutura).
-
-## 📂 v2_inversao_dependencia
-
-**A Solução (DIP - Dependency Inversion Principle):** O Contrato da Lei da Surpresa.
-* Criamos a interface `AcaoAposGerarNota`.
-* O `GeradorDeNotaFiscal` agora aceita qualquer um que assine esse contrato (`List<AcaoAposGerarNota>`).
-* **Ganho:** O Gerador tornou-se "cego" para a implementação. Ele apenas manda executar.
-* **Efeito Colateral (OCP):** Conseguimos adicionar novas funcionalidades (`SapERP`, `LogDeAuditoria`, `EnviadorDeSMS`) sem tocar no código do Gerador.
+Exploramos dois cenários distintos de refatoração:
 
 ---
 
-## ⚔️ Crônicas do Concílio: Debates Técnicos
+## ⚔️ Cenário A: O Gerador de Notas (Foco em DIP)
 
-Durante a implementação, enfrentamos conceitos vitais para a sobrevivência de um sistema a longo prazo.
+Aqui combatemos o acoplamento causado pela dependência direta de classes de serviço.
+
+### 🔴 O Problema (v1_acoplamento_concreto)
+O `GeradorDeNotaFiscal` exigia parceiros específicos no construtor (`EnviadorDeEmail`, `NotaFiscalDao`).
+* **Rigidez:** Se precisássemos trocar o E-mail por SMS, teríamos que alterar o código do Gerador.
+* **Testabilidade Ruim:** Difícil de mockar as dependências concretas.
+
+### 🟢 A Solução (v2_classes_estaveis)
+Aplicamos o **DIP (Dependency Inversion Principle)**.
+* Criamos a interface `AcaoAposGerarNota`.
+* O Gerador agora aceita uma `List<AcaoAposGerarNota>`.
+* **Resultado:** O Gerador tornou-se "cego" para a implementação. Adicionamos `SapERP`, `LogDeAuditoria` e `EnviadorDeSMS` sem tocar em uma linha sequer do Gerador (OCP).
+
+---
+
+## 📦 Cenário B: O Despachador de Notas (Foco em Encapsulamento)
+
+Aqui combatemos o acoplamento causado pelo excesso de conhecimento (Micro-gerenciamento).
+
+### 🔴 O Problema (v1...despachador_nf)
+O `DespachadorDeNotasFiscais` sofria de **Acoplamento Eferente** excessivo.
+* Ele conhecia `LeiDeEntrega`, `Correios`, `CalculadorDeImposto` e `NFDao`.
+* Ele decidia *como* entregar: `if (lei.urgente(nf)) correios.sedex10()`.
+* **Violação:** O Despachador sabia demais sobre a lógica de entrega.
+
+### 🟢 A Solução (v2...despachador_nf)
+Aplicamos o **Encapsulamento** para reduzir o acoplamento.
+* Criamos a classe `EntregadorDeNFs`.
+* Movemos a `LeiDeEntrega` e `Correios` para dentro do Entregador.
+* O Despachador agora apenas ordena: `entregador.entrega(nf)`.
+* **Resultado:** Reduzimos a complexidade do Despachador e centralizamos a regra de negócio onde ela pertence.
+
+---
+
+## 🧠 Conceitos Chave do Capítulo
 
 ### 1. Estabilidade vs. Instabilidade
-Por que podemos depender de `String` ou `List`, mas não de `EnviadorDeEmail`?
-* **Classes Estáveis:** Mudam muito pouco (ex: Bibliotecas do Java). É seguro acoplar-se a elas.
-* **Classes Instáveis:** Mudam com frequência (Regras de Negócio, Infraestrutura). Fugimos desse acoplamento usando Interfaces.
+Nem todo acoplamento é ruim.
+* **Classes Estáveis:** Mudam pouco (ex: `String`, `List`, e nossa classe de domínio `Fatura`). É seguro depender delas.
+* **Classes Instáveis:** Mudam muito (Serviços, DAOs, Regras de Negócio). Devemos nos proteger delas usando Interfaces ou Encapsulamento.
 
 ### 2. O Mito do "New"
-Muitos acham que apenas remover a palavra `new` resolve o acoplamento.
 * **Mito:** "Se eu recebo no construtor, estou desacoplado."
-* **Verdade:** Se você recebe uma Classe Concreta no construtor (`public Gerador(EnviadorDeEmail email)`), você ainda está fortemente acoplado. O desacoplamento real só acontece quando você depende de uma Abstração (`public Gerador(AcaoAposGerarNota acao)`).
+* **Verdade:** Se você recebe uma Classe Concreta (`public Gerador(EnviadorDeEmail email)`), você ainda está acoplado. O desacoplamento real exige abstrações (`public Gerador(AcaoAposGerarNota acao)`).
 
-### 3. Inteligência Distribuída (Encapsulamento)
-No caso do `EnviadorDeSMS`, surgiu a dúvida: Quem decide se o SMS deve ser enviado?
-* **Opção Ruim:** O Gerador verifica `if (valor > 1000)`. (Viola o encapsulamento, o Gerador sabe demais).
-* **Opção Ninja:** O próprio `EnviadorDeSMS` recebe a ordem e decide se executa ou ignora. O Gerador apenas delega.
+### 3. Tell, Don't Ask (Diga, não pergunte)
+No cenário do Despachador, paramos de perguntar se a nota era urgente. Passamos a dizer para o especialista: "Entregue". Isso protege o encapsulamento e facilita a manutenção.
 
 ---
 
-## 📜 Resumo dos Princípios Abordados
+## 🧪 Testes Unitários
 
-| Sigla | Princípio | Aplicação no Projeto |
-| :--- | :--- | :--- |
-| **DIP** | Dependency Inversion | O Gerador depende da interface `AcaoAposGerarNota`, não das classes concretas. |
-| **OCP** | Open/Closed | Adicionamos `LogDeAuditoria` e `SapERP` sem modificar o `GeradorDeNotaFiscal`. |
-| **Encapsulamento** | Tell, Don't Ask | O `EnviadorDeSMS` decide internamente se deve ou não enviar a mensagem baseada no valor. |
+Implementamos testes que provam a evolução da arquitetura:
+* `GeradorDeNotaFiscalV1Test` vs `GeradorDeNotaFiscalV2Test`: Mostra como o DIP facilita o uso de Mocks.
+* `DespachadorV1Test` vs `DespachadorV2Test`: Mostra como o Encapsulamento simplifica o teste da classe cliente.
+* `EntregadorDeNFsTest`: Mostra como testar regras de negócio isoladas.
 
 > *"Programe para uma interface, não para uma implementação."* — Gang of Four (GoF)

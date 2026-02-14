@@ -1,4 +1,4 @@
-package capitulo3_acoplamento.v1_acoplamento_concreto;
+package capitulo3_acoplamento.v1_acoplamento_concreto.gerador_nf;
 
 /**
  * Versão fiel ao livro "OO e SOLID para Ninjas".
@@ -20,19 +20,29 @@ public class GeradorDeNotaFiscal {
 
     // AQUI ESTÁ O ERRO DO BRUXO APRENDIZ:
     // Ele pede as ferramentas EXATAS (Concretas), tirando a flexibilidade.
-    public GeradorDeNotaFiscal(EnviadorDeEmail email, NotaFiscalDao dao) {
+    public GeradorDeNotaFiscal(EnviadorDeEmail email,
+                               NotaFiscalDao dao) {
         this.email = email;
         this.dao = dao;
     }
 
-    public NotaFiscal gera(double valor) {
-        double imposto = valor * 0.06;
-        NotaFiscal nf = new NotaFiscal(valor, imposto);
+    public NotaFiscal gera(Fatura fatura) {
+
+        double valor = fatura.getValorMensal();
+
+        NotaFiscal nf = new NotaFiscal(
+                valor,
+                impostoSimplesSobreO(valor)
+        );
 
         // A classe sabe "quem" faz o trabalho, em vez de saber "o que" precisa ser feito.
-        this.email.envia(nf);
-        this.dao.persiste(nf);
+        email.enviaEmail(nf);
+        dao.persiste(nf);
 
         return nf;
+    }
+
+    private double impostoSimplesSobreO(double valor) {
+        return valor * 0.06;
     }
 }

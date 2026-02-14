@@ -5,9 +5,16 @@ import java.util.List;
 
 /**
  * Campo de Treinamento para testar o Acoplamento.
- * Aqui vamos comparar dois bruxos realizando a mesma tarefa:
- * 1. O Bruxo V1 (Acoplado/Rígido)
- * 2. O Bruxo V2 (Ninja/SOLID/Flexível)
+ *
+ * AQUI TEMOS DUAS BATALHAS DISTINTAS:
+ *
+ * BATALHA A: O GERADOR DE NOTAS (Foco em DIP - Dependency Inversion Principle)
+ * - V1: Acoplado a classes concretas.
+ * - V2: Acoplado a interfaces (Lista de Ações).
+ *
+ * BATALHA B: O DESPACHADOR DE NOTAS (Foco em Encapsulamento e Coesão)
+ * - V1: O Despachador micro-gerencia os Correios e a Lei.
+ * - V2: O Despachador delega para um especialista (EntregadorDeNFs).
  *
  * @author Weriton L. Petreca
  */
@@ -16,81 +23,114 @@ public class SimuladorDeAcoplamento {
     public static void main(String[] args) {
         infra.Console.consertarAcentuacao();
 
-        System.out.println("⚔️ INICIANDO A SIMULAÇÃO DE ACOPLAMENTO ⚔️\n");
+        System.out.println("==================================================");
+        System.out.println("⚔️  CAPÍTULO 3: AS CRÔNICAS DO ACOPLAMENTO  ⚔️");
+        System.out.println("==================================================\n");
 
-        executarCenarioV1_O_Bruxo_Rigido();
+        // --- BATALHA A: GERADOR DE NOTAS ---
+        System.out.println("--- [PARTE A] O GERADOR DE NOTAS (DIP) ---\n");
+        executarCenarioGeradorV1();
+        System.out.println();
+        executarCenarioGeradorV2();
 
-        System.out.println("\n--------------------------------------------------\n");
+        System.out.println("\n==================================================\n");
 
-        executarCenarioV2_O_Bruxo_Mestre();
+        // --- BATALHA B: DESPACHADOR DE NOTAS ---
+        System.out.println("--- [PARTE B] O DESPACHADOR DE NOTAS (ENCAPSULAMENTO) ---\n");
+        executarCenarioDespachadorV1();
+        System.out.println();
+        executarCenarioDespachadorV2();
     }
 
-    /**
-     * CENÁRIO 1: O Caminho da Dor (Acoplamento Concreto).
-     *
-     * O Gerador exige instâncias exatas de EnviadorDeEmail e NotaFiscalDao.
-     * Não há espaço para improviso ou novas ferramentas (como SAP).
-     */
-    private static void executarCenarioV1_O_Bruxo_Rigido() {
-        System.out.println(">>> CENÁRIO 1: O Bruxo Rígido (Acoplamento Concreto)");
+    // ==================================================================================
+    // PARTE A: O GERADOR (DIP)
+    // ==================================================================================
 
-        // 1. Preparando as ferramentas fixas (Concretas)
-        var email = new capitulo3_acoplamento.v1_acoplamento_concreto.EnviadorDeEmail();
-        var dao = new capitulo3_acoplamento.v1_acoplamento_concreto.NotaFiscalDao();
+    private static void executarCenarioGeradorV1() {
+        System.out.println(">>> CENÁRIO A1: O Gerador Rígido (Acoplamento Concreto)");
+        System.out.println("Pacote: capitulo3_acoplamento.v1_acoplamento_concreto");
 
-        // 2. Criando o Gerador (Perceba que ele pede as classes CONCRETAS no construtor)
-        var geradorV1 = new capitulo3_acoplamento.v1_acoplamento_concreto.GeradorDeNotaFiscal(email, dao);
+        var email = new capitulo3_acoplamento.v1_acoplamento_concreto.gerador_nf.EnviadorDeEmail();
+        var dao = new capitulo3_acoplamento.v1_acoplamento_concreto.gerador_nf.NotaFiscalDao();
+        var geradorV1 = new capitulo3_acoplamento.v1_acoplamento_concreto.gerador_nf.GeradorDeNotaFiscal(email, dao);
 
-        // 3. Executando a ação
-        System.out.println("Gerando nota de 1000 moedas...");
-        capitulo3_acoplamento.v1_acoplamento_concreto.NotaFiscal nf = geradorV1.gera(1000.0);
+        System.out.println("Gerando nota...");
+        var fatura = new capitulo3_acoplamento.v1_acoplamento_concreto.gerador_nf.Fatura("Geralt", 1000.0);
+        var nf = geradorV1.gera(fatura);
 
-        System.out.println("Resultado: Nota gerada com valor " + nf.getValor() + " e imposto " + nf.getImposto());
-        System.out.println("(Nota: Se quiséssemos adicionar o SAP aqui, teríamos que REESCREVER a classe Gerador)");
+        System.out.println("Resultado: Nota de " + nf.getValor() + " gerada para " + fatura.getCliente());
     }
 
-    /**
-     * CENÁRIO 2: O Caminho da Sabedoria (Inversão de Dependência).
-     *
-     * O Gerador aceita qualquer "AcaoAposGerarNota".
-     * Podemos montar nosso arsenal (Lista) da forma que quisermos.
-     */
+    private static void executarCenarioGeradorV2() {
+        System.out.println(">>> CENÁRIO A2: O Gerador Mestre (DIP & Polimorfismo)");
+        System.out.println("Pacote: capitulo3_acoplamento.v2_inversao_dependencia");
 
-    private static void executarCenarioV2_O_Bruxo_Mestre() {
-        System.out.println(">>> CENÁRIO 2: O Bruxo Mestre (DIP & Polimorfismo)");
+        var acaoEmail = new capitulo3_acoplamento.v2_inversao_dependencia.gerador_nf.EnviadorDeEmail();
+        var acaoDao = new capitulo3_acoplamento.v2_inversao_dependencia.gerador_nf.NotaFiscalDao();
+        var acaoSap = new capitulo3_acoplamento.v2_inversao_dependencia.gerador_nf.SapERP();
+        var acaoAuditoria = new capitulo3_acoplamento.v2_inversao_dependencia.gerador_nf.LogDeAuditoria();
+        var acaoSms = new capitulo3_acoplamento.v2_inversao_dependencia.gerador_nf.EnviadorDeSMS();
 
-        // 1. Convocando os Aliados (Todos assinam a interface AcaoAposGerarNota)
-        // Note que agora usamos a INTERFACE para referenciar as instâncias, se quiséssemos.
-        var acaoEmail = new capitulo3_acoplamento.v2_inversao_dependencia.EnviadorDeEmail();
-        var acaoDao = new capitulo3_acoplamento.v2_inversao_dependencia.NotaFiscalDao();
-        var acaoSap = new capitulo3_acoplamento.v2_inversao_dependencia.SapERP(); // <--- Novidade!
-        var acaoAuditoria = new capitulo3_acoplamento.v2_inversao_dependencia.LogDeAuditoria();
-        var acaoSms = new capitulo3_acoplamento.v2_inversao_dependencia.EnviadorDeSMS();
-
-        // 2. Montando o Arsenal (Lista de Interfaces)
-        // O Gerador não sabe quem está nesta lista, apenas que eles obedecem ao contrato.
-        List<capitulo3_acoplamento.v2_inversao_dependencia.AcaoAposGerarNota> acoes = Arrays.asList(
-                acaoEmail,
-                acaoDao,
-                acaoSap,
-                acaoAuditoria,
-                acaoSms
-
+        List<capitulo3_acoplamento.v2_inversao_dependencia.gerador_nf.AcaoAposGerarNota> acoes = Arrays.asList(
+                acaoEmail, acaoDao, acaoSap, acaoAuditoria, acaoSms
         );
 
-        // 3. Criando o Gerador (Ele pede apenas a LISTA de interfaces)
-        var geradorV2 = new capitulo3_acoplamento.v2_inversao_dependencia.GeradorDeNotaFiscal(acoes);
+        var geradorV2 = new capitulo3_acoplamento.v2_inversao_dependencia.gerador_nf.GeradorDeNotaFiscal(acoes);
 
-        // 4. Executando a ação
-        System.out.println("Gerando nota de 2000 moedas com poder total...");
-        capitulo3_acoplamento.v2_inversao_dependencia.NotaFiscal nf = geradorV2.gera(2000.0);
+        System.out.println("Gerando nota com múltiplos ouvintes...");
+        var fatura = new capitulo3_acoplamento.v2_inversao_dependencia.gerador_nf.Fatura("Vesemir", 2000.0);
+        var nf = geradorV2.gera(fatura);
 
-        System.out.println("\n--------------------------------------------------\n");
+        System.out.println("Resultado: Nota processada com sucesso.");
+    }
 
-        // 5. Testando com valor abaixo de 1000
-        System.out.println("Testando com valor abaixo de 1000... (não deve disparar SMS)");
-        capitulo3_acoplamento.v2_inversao_dependencia.NotaFiscal nf2 = geradorV2.gera(500.00);
+    // ==================================================================================
+    // PARTE B: O DESPACHADOR (ENCAPSULAMENTO)
+    // ==================================================================================
 
-        System.out.println("Resultado: Notas V2 geradas com sucesso!");
+    private static void executarCenarioDespachadorV1() {
+        System.out.println(">>> CENÁRIO B1: O Despachador Micro-Gerenciador (V1)");
+        System.out.println("Pacote: capitulo3_acoplamento.v1_acoplamento_concreto.despachador_nf");
+        System.out.println("(O Despachador precisa conhecer Correios, Lei, Dao e Imposto...)");
+
+        // 1. Instanciando o caos de dependências
+        var dao = new capitulo3_acoplamento.v1_acoplamento_concreto.despachador_nf.NFDao();
+        var imposto = new capitulo3_acoplamento.v1_acoplamento_concreto.despachador_nf.CalculadorDeImposto();
+        var lei = new capitulo3_acoplamento.v1_acoplamento_concreto.despachador_nf.LeiDeEntrega();
+        var correios = new capitulo3_acoplamento.v1_acoplamento_concreto.despachador_nf.Correios();
+
+        // 2. O Despachador recebe tudo isso no construtor
+        var despachador = new capitulo3_acoplamento.v1_acoplamento_concreto.despachador_nf.DespachadorDeNotasFiscais(
+                dao, imposto, lei, correios
+        );
+
+        // 3. Processando
+        var nf = new capitulo3_acoplamento.v1_acoplamento_concreto.despachador_nf.NotaFiscal(2500.0);
+        despachador.processa(nf);
+    }
+
+    private static void executarCenarioDespachadorV2() {
+        System.out.println(">>> CENÁRIO B2: O Despachador Delegador (V2)");
+        System.out.println("Pacote: capitulo3_acoplamento.v2_inversao_dependencia.despachador_nf");
+        System.out.println("(O Despachador só conhece o Entregador. A complexidade foi encapsulada.)");
+
+        // 1. Preparando as dependências
+        var dao = new capitulo3_acoplamento.v2_inversao_dependencia.despachador_nf.NFDao();
+        var imposto = new capitulo3_acoplamento.v2_inversao_dependencia.despachador_nf.CalculadorDeImposto();
+        var lei = new capitulo3_acoplamento.v2_inversao_dependencia.despachador_nf.LeiDeEntrega();
+        var correios = new capitulo3_acoplamento.v2_inversao_dependencia.despachador_nf.Correios();
+
+        // 2. A MÁGICA: Criamos o Especialista (Entregador)
+        // Agrupamos Lei e Correios dentro dele.
+        var entregador = new capitulo3_acoplamento.v2_inversao_dependencia.despachador_nf.EntregadorDeNFs(lei, correios);
+
+        // 3. O Despachador agora é mais limpo
+        var despachador = new capitulo3_acoplamento.v2_inversao_dependencia.despachador_nf.DespachadorDeNotasFiscais(
+                imposto, entregador, dao
+        );
+
+        // 4. Processando
+        var nf = new capitulo3_acoplamento.v2_inversao_dependencia.despachador_nf.NotaFiscal(2500.0);
+        despachador.processa(nf);
     }
 }

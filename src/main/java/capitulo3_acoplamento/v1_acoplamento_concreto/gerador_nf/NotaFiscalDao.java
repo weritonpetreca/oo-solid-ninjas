@@ -1,4 +1,4 @@
-package capitulo3_acoplamento.v1_acoplamento_concreto;
+package capitulo3_acoplamento.v1_acoplamento_concreto.gerador_nf;
 
 /**
  * Outra ferramenta concreta: O Escriba do Banco de Dados.
