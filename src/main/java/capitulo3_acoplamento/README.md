@@ -4,7 +4,7 @@
 
 Neste capítulo, saímos das muralhas internas da classe (Coesão) para observar como elas interagem entre si (Acoplamento). Aprendemos que depender de classes concretas é como casar com um monstro específico: quando ele muda, você sofre.
 
-Exploramos dois cenários distintos de refatoração:
+Exploramos três níveis de evolução arquitetural:
 
 ---
 
@@ -12,16 +12,21 @@ Exploramos dois cenários distintos de refatoração:
 
 Aqui combatemos o acoplamento causado pela dependência direta de classes de serviço.
 
-### 🔴 O Problema (v1_acoplamento_concreto)
+### 🔴 v1_acoplamento_concreto (O Problema)
 O `GeradorDeNotaFiscal` exigia parceiros específicos no construtor (`EnviadorDeEmail`, `NotaFiscalDao`).
 * **Rigidez:** Se precisássemos trocar o E-mail por SMS, teríamos que alterar o código do Gerador.
 * **Testabilidade Ruim:** Difícil de mockar as dependências concretas.
 
-### 🟢 A Solução (v2_classes_estaveis)
+### 🟡 v2_inversao_dependencia (A Solução Intermediária)
 Aplicamos o **DIP (Dependency Inversion Principle)**.
 * Criamos a interface `AcaoAposGerarNota`.
 * O Gerador agora aceita uma `List<AcaoAposGerarNota>`.
 * **Resultado:** O Gerador tornou-se "cego" para a implementação. Adicionamos `SapERP`, `LogDeAuditoria` e `EnviadorDeSMS` sem tocar em uma linha sequer do Gerador (OCP).
+
+### 🟢 v3_dip_completo (A Arquitetura Hexagonal)
+Levamos o desacoplamento ao extremo.
+* **Ports & Adapters:** O Gerador (Use Case) define portas (interfaces) que o mundo externo (Adapters) deve implementar.
+* **Isolamento Total:** O domínio não conhece nada sobre infraestrutura.
 
 ---
 
@@ -29,18 +34,43 @@ Aplicamos o **DIP (Dependency Inversion Principle)**.
 
 Aqui combatemos o acoplamento causado pelo excesso de conhecimento (Micro-gerenciamento).
 
-### 🔴 O Problema (v1...despachador_nf)
+### 🔴 v1_acoplamento_concreto (O Micro-Gerenciador)
 O `DespachadorDeNotasFiscais` sofria de **Acoplamento Eferente** excessivo.
 * Ele conhecia `LeiDeEntrega`, `Correios`, `CalculadorDeImposto` e `NFDao`.
 * Ele decidia *como* entregar: `if (lei.urgente(nf)) correios.sedex10()`.
 * **Violação:** O Despachador sabia demais sobre a lógica de entrega.
 
-### 🟢 A Solução (v2...despachador_nf)
+### 🟡 v2_inversao_dependencia (O Delegador)
 Aplicamos o **Encapsulamento** para reduzir o acoplamento.
 * Criamos a classe `EntregadorDeNFs`.
 * Movemos a `LeiDeEntrega` e `Correios` para dentro do Entregador.
 * O Despachador agora apenas ordena: `entregador.entrega(nf)`.
 * **Resultado:** Reduzimos a complexidade do Despachador e centralizamos a regra de negócio onde ela pertence.
+
+### 🟢 v3_dip_completo (O Comandante Hexagonal)
+O Despachador agora depende apenas de **Interfaces (Ports)**.
+* `CalculadorDeImposto` (Interface)
+* `Entregador` (Interface)
+* `Repositorio` (Interface)
+* **Benefício:** Podemos trocar o `EntregadorDeNFs` por um `EntregadorDeDrones` ou o `NFDao` por um `ArquivoDao` sem recompilar o Despachador.
+
+---
+
+## 🧪 A Prova de Fogo: Testes Unitários
+
+Os testes não servem apenas para garantir que funciona, eles servem como um **Termômetro de Design**.
+
+### 1. O Inferno do Setup (`DespachadorV1Test`)
+Para testar a classe acoplada, tivemos que criar **4 Mocks** (`Dao`, `Imposto`, `Lei`, `Correios`) e configurar comportamentos complexos (`when(lei...).thenReturn(...)`).
+* **Lição:** Se o setup do seu teste é gigante, sua classe está acoplada demais.
+
+### 2. A Redenção (`DespachadorV2Test`)
+Ao encapsular a lógica no `EntregadorDeNFs`, o teste do Despachador ficou limpo. Só precisamos verificar se ele chamou `entregador.entrega()`.
+* **Lição:** Classes delegadoras são fáceis de testar.
+
+### 3. O Foco (`EntregadorDeNFsTest`)
+Testamos a regra de negócio (Sedex 10 vs Comum) isoladamente.
+* **Lição:** Testar classes pequenas e coesas é trivial. Se falhar, sabemos exatamente onde está o erro.
 
 ---
 
@@ -58,13 +88,7 @@ Nem todo acoplamento é ruim.
 ### 3. Tell, Don't Ask (Diga, não pergunte)
 No cenário do Despachador, paramos de perguntar se a nota era urgente. Passamos a dizer para o especialista: "Entregue". Isso protege o encapsulamento e facilita a manutenção.
 
----
-
-## 🧪 Testes Unitários
-
-Implementamos testes que provam a evolução da arquitetura:
-* `GeradorDeNotaFiscalV1Test` vs `GeradorDeNotaFiscalV2Test`: Mostra como o DIP facilita o uso de Mocks.
-* `DespachadorV1Test` vs `DespachadorV2Test`: Mostra como o Encapsulamento simplifica o teste da classe cliente.
-* `EntregadorDeNFsTest`: Mostra como testar regras de negócio isoladas.
+### 4. Intimidade Indesejada (Feature Envy)
+Na V1, o Despachador tinha muita "intimidade" com a `LeiDeEntrega` e os `Correios`. Ele sabia detalhes internos de como eles funcionavam. O bom design OO preza pela privacidade: cada objeto cuida de seus dados e comportamentos.
 
 > *"Programe para uma interface, não para uma implementação."* — Gang of Four (GoF)
