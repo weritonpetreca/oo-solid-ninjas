@@ -8,6 +8,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.*;
 
+/**
+ * 🧪 O TESTE DO DELEGADOR (ENCAPSULAMENTO)
+ *
+ * Este teste mostra como o encapsulamento simplifica a vida do cliente.
+ *
+ * 🛡️ VANTAGENS:
+ * 1. Setup Limpo: Mockamos apenas o "EntregadorDeNFs".
+ *    Não precisamos saber se ele usa Correios, Pombos ou Drones.
+ * 2. Foco: O teste valida apenas se o Despachador "mandou entregar".
+ *    A lógica de "como entregar" é testada em outro lugar (EntregadorDeNFsTest).
+ */
 @ExtendWith(MockitoExtension.class)
 public class DespachadorV2Test {
 

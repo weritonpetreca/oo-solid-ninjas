@@ -13,6 +13,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+/**
+ * 🧪 O TESTE DA GLÓRIA (DIP - DEPENDENCY INVERSION)
+ *
+ * Este teste demonstra a facilidade de testar classes desacopladas.
+ *
+ * 🛡️ VANTAGENS:
+ * 1. Mockamos INTERFACES (AcaoAposGerarNota), o que é seguro e fácil.
+ * 2. O teste não sabe se estamos enviando Email, SMS ou salvando no banco.
+ *    Ele apenas verifica se a "Ação" foi executada.
+ * 3. Podemos testar regras de negócio isoladas (como o SMS > 1000) sem instanciar o Gerador inteiro.
+ */
 @ExtendWith(MockitoExtension.class) // Habilita os poderes do Mockito
 public class GeradorDeNotaFiscalV2Test {
 

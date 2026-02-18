@@ -8,6 +8,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.*;
 
+/**
+ * 🧪 O TESTE DO MICRO-GERENCIADOR (ACOPLAMENTO EFERENTE)
+ *
+ * Este teste revela o problema de uma classe que sabe demais.
+ *
+ * ⚠️ SINTOMAS DE DESIGN RUIM:
+ * 1. Setup Gigante: Precisamos mockar 4 dependências (Dao, Imposto, Lei, Correios).
+ * 2. Intimidade Indesejada: O teste precisa saber que o Despachador chama "lei.deveEntregarUrgente".
+ *    Se mudarmos a implementação interna do Despachador, o teste quebra.
+ * 3. Teste Frágil: Estamos testando a lógica de entrega DENTRO do teste do Despachador.
+ */
 @ExtendWith(MockitoExtension.class)
 public class DespachadorV1Test {
 

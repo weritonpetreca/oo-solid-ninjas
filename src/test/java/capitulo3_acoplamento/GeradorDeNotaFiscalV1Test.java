@@ -6,6 +6,17 @@ import org.mockito.Mockito;
 
 import static org.mockito.Mockito.verify;
 
+/**
+ * 🧪 O TESTE DA DOR (ACOPLAMENTO CONCRETO)
+ *
+ * Este teste demonstra a dificuldade de testar classes acopladas.
+ *
+ * ⚠️ PROBLEMAS:
+ * 1. Mockar classes concretas (EnviadorDeEmail, NotaFiscalDao) é arriscado.
+ *    Se elas tiverem lógica no construtor, o teste quebra.
+ *    Se elas forem 'final', o Mockito não consegue criar o dublê.
+ * 2. O teste conhece detalhes de implementação (sabe que existe um DAO e um Email).
+ */
 public class GeradorDeNotaFiscalV1Test {
 
     @Test

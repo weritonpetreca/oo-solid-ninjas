@@ -10,11 +10,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.Mockito.*;
 
 /**
- * 🧪 TESTE DO ESPECIALISTA EM LOGÍSTICA
+ * 🧪 O TESTE DO ESPECIALISTA (COESÃO)
  *
- * Aqui testamos o EntregadorDeNFs isoladamente.
- * Este é o único lugar do sistema onde LeiDeEntrega e Correios aparecem nos testes.
- * O DespachadorV2Test não sabe que eles existem. Separação perfeita.
+ * Aqui testamos a regra de negócio de entrega ISOLADAMENTE.
+ *
+ * 🛡️ VANTAGENS:
+ * 1. Teste Focado: Se este teste falhar, sabemos que o problema está na lógica de entrega.
+ *    Não precisamos investigar o Despachador, o Imposto ou o DAO.
+ * 2. Cobertura de Cenários: É fácil testar todos os caminhos (Urgente vs Comum)
+ *    sem precisar montar um cenário complexo de Despachador.
  */
 
 @ExtendWith(MockitoExtension.class)

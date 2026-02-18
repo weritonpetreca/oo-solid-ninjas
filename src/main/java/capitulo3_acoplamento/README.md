@@ -23,7 +23,7 @@ Aplicamos o **DIP (Dependency Inversion Principle)**.
 * O Gerador agora aceita uma `List<AcaoAposGerarNota>`.
 * **Resultado:** O Gerador tornou-se "cego" para a implementação. Adicionamos `SapERP`, `LogDeAuditoria` e `EnviadorDeSMS` sem tocar em uma linha sequer do Gerador (OCP).
 
-### 🟢 v3_dip_completo (A Arquitetura Hexagonal)
+### 🟢 v3_dip_completo (A Arquitetura Hexagonal + Clean Arch)
 Levamos o desacoplamento ao extremo.
 * **Ports & Adapters:** O Gerador (Use Case) define portas (interfaces) que o mundo externo (Adapters) deve implementar.
 * **Isolamento Total:** O domínio não conhece nada sobre infraestrutura.
@@ -56,7 +56,30 @@ O Despachador agora depende apenas de **Interfaces (Ports)**.
 
 ---
 
-## 🧪 A Prova de Fogo: Testes Unitários
+## 🏰 Arquitetura Hexagonal vs. Clean Architecture
+
+Na versão `v3`, utilizamos uma abordagem híbrida que combina o melhor dos dois mundos.
+
+### 1. Hexagonal (Ports & Adapters)
+Focada em **Interfaces**.
+* **Ports (Portas):** São as interfaces que definem os serviços (`Repositorio`, `Entregador`). Elas ficam DENTRO do hexágono (núcleo).
+* **Adapters (Adaptadores):** São as implementações concretas (`NFDao`, `Correios`). Elas ficam FORA do hexágono.
+
+### 2. Clean Architecture (Onion)
+Focada em **Camadas Concêntricas**.
+* **Entities (Domain):** O centro absoluto. Regras de negócio puras (`NotaFiscal`, `Fatura`). Não dependem de ninguém.
+* **Use Cases (Application):** Orquestram o fluxo (`DespachadorDeNotasFiscais`). Dependem apenas do Domínio.
+
+### 🛡️ Nossa Implementação (v3)
+Unimos os conceitos:
+* `domain`: Entidades puras (Clean Arch).
+* `usecases`: Regras de aplicação (Clean Arch).
+* `ports`: Interfaces para saída (Hexagonal).
+* `adapters`: Implementações externas (Hexagonal).
+
+---
+
+## 🧪 A Prova de Fogo: Testes Unitários e Arquiteturais
 
 Os testes não servem apenas para garantir que funciona, eles servem como um **Termômetro de Design**.
 
@@ -71,6 +94,12 @@ Ao encapsular a lógica no `EntregadorDeNFs`, o teste do Despachador ficou limpo
 ### 3. O Foco (`EntregadorDeNFsTest`)
 Testamos a regra de negócio (Sedex 10 vs Comum) isoladamente.
 * **Lição:** Testar classes pequenas e coesas é trivial. Se falhar, sabemos exatamente onde está o erro.
+
+### 4. O Guardião (`ArquiteturaTest`)
+Utilizamos a biblioteca **ArchUnit** para garantir que as regras do DIP não sejam violadas.
+* Testamos se o pacote `domain` depende de `adapters` (Proibido!).
+* Testamos se o pacote `ports` depende de `adapters` (Proibido!).
+* **Lição:** Em projetos grandes, testes arquiteturais impedem que desenvolvedores quebrem o isolamento das camadas por descuido.
 
 ---
 
