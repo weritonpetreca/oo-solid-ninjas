@@ -73,9 +73,9 @@ Criamos uma interface "Máscara" (`DadosParaCalculo`) que expõe *apenas* o sal�
 
 ---
 
-## 🏰 A Visão do Futuro: Arquitetura Hexagonal
+## 🏰 A Visão do Futuro: Arquitetura Hexagonal e Clean Architecture
 
-O Capítulo 3 consolida a visão de arquiteturas avançadas, como a **Hexagonal (Ports and Adapters)**.
+O Capítulo 3 consolida a visão de arquiteturas avançadas, como a **Hexagonal (Ports and Adapters)** e a **Clean Architecture**.
 
 Ao separar a `RegraDeCalculo` (Lógica de Negócio) da `Calculadora/Controller` (Fluxo), nós isolamos o **Domínio**.
 
@@ -90,6 +90,8 @@ Ao separar a `RegraDeCalculo` (Lógica de Negócio) da `Calculadora/Controller` 
 
 * **Java 21** (A linguagem antiga)
 * **JUnit 5** (A prova dos 9)
+* **Mockito** (O mestre dos disfarces)
+* **ArchUnit** (O guardião da arquitetura)
 * **IntelliJ IDEA** (O laboratório)
 
 > “Vá, programe, e que seu código seja limpo como a lâmina de Geralt.”
