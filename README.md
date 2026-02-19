@@ -30,6 +30,28 @@ Visitando a pasta `capitulo2_coesao`, você verá a evolução da refatoração 
 
 ---
 
+## 🔗 Capítulo 3: As Amarras do Destino (Acoplamento e DIP)
+
+Neste capítulo, saímos das muralhas internas da classe para observar como elas interagem entre si. Aprendemos que depender de classes concretas é perigoso.
+
+Visitando a pasta `capitulo3_acoplamento`, exploramos dois cenários de batalha:
+
+### 🛡️ Cenário A: O Gerador de Notas (DIP)
+Combatemos o acoplamento rígido a serviços externos (Email, DAO).
+* **v1 (Concreto):** O Gerador dependia de classes específicas. Difícil de testar e evoluir.
+* **v2 (Abstrato):** O Gerador depende de uma lista de interfaces (`AcaoAposGerarNota`).
+* **v3 (Hexagonal):** A aplicação completa do DIP, isolando o domínio da infraestrutura através de *Ports & Adapters*.
+
+### 📦 Cenário B: O Despachador de Notas (Encapsulamento)
+Combatemos o micro-gerenciamento e a "Intimidade Indesejada".
+* **v1 (Micro-Gerenciador):** O Despachador sabia demais sobre regras de Correios e Leis.
+* **v2 (Delegador):** Encapsulamos a lógica no `EntregadorDeNFs`. O Despachador apenas ordena.
+* **v3 (Hexagonal):** O Despachador torna-se um *Use Case* puro, dependendo apenas de interfaces.
+
+> **Lição Aprendida:** "Programe para uma interface, não para uma implementação."
+
+---
+
 ## 📜 O Grande Debate: Passar o Objeto ou o Valor?
 
 Durante o concílio dos bruxos (clube de leitura), surgiu um debate interessante sobre o método `calcula()`. Como devemos passar os dados para a regra?
@@ -51,16 +73,16 @@ Criamos uma interface "Máscara" (`DadosParaCalculo`) que expõe *apenas* o sal�
 
 ---
 
-## 🏰 A Visão do Futuro: Arquitetura Hexagonal
+## 🏰 A Visão do Futuro: Arquitetura Hexagonal e Clean Architecture
 
-O Capítulo 2 também planta a semente de arquiteturas avançadas, como a **Hexagonal (Ports and Adapters)**.
+O Capítulo 3 consolida a visão de arquiteturas avançadas, como a **Hexagonal (Ports and Adapters)** e a **Clean Architecture**.
 
 Ao separar a `RegraDeCalculo` (Lógica de Negócio) da `Calculadora/Controller` (Fluxo), nós isolamos o **Domínio**.
 
 * **No mundo Procedural:** A lógica de negócio está suja com SQL, Tela e HTTP. Se você troca o banco, a regra quebra.
 * **No mundo do Bruxo (Hexagonal):** O Domínio (Kaer Morhen) fica no centro, protegido. O Banco de Dados e a Web são apenas "detalhes" externos (monstros ou clientes) que se conectam através de portões (Interfaces).
 
-**Conclusão:** Praticar o SRP e a Coesão é o primeiro passo para construir fortalezas impenetráveis.
+**Conclusão:** Praticar o SRP, a Coesão e o DIP é o primeiro passo para construir fortalezas impenetráveis.
 
 ---
 
@@ -68,6 +90,8 @@ Ao separar a `RegraDeCalculo` (Lógica de Negócio) da `Calculadora/Controller` 
 
 * **Java 21** (A linguagem antiga)
 * **JUnit 5** (A prova dos 9)
+* **Mockito** (O mestre dos disfarces)
+* **ArchUnit** (O guardião da arquitetura)
 * **IntelliJ IDEA** (O laboratório)
 
 > “Vá, programe, e que seu código seja limpo como a lâmina de Geralt.”
