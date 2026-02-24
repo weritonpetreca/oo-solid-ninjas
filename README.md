@@ -86,12 +86,175 @@ Ao separar a `RegraDeCalculo` (Lógica de Negócio) da `Calculadora/Controller` 
 
 ---
 
+## 🔓 Capítulo 4: Classes Abertas e o Tal do OCP
+
+> *"Um Bruxo não muda o feitiço toda vez que encontra um novo monstro. Ele aprende novos feitiços. O livro de feitiços está aberto para extensão, mas cada feitiço já escrito está fechado para modificação."*
+
+O **Open/Closed Principle (OCP)** é o segundo dos princípios SOLID. Este capítulo ensina como fazer o sistema evoluir sem precisar mexer no que já funciona.
+
+Visitando a pasta `capitulo4_ocp`, você verá a evolução em 4 estágios:
+
+### 📂 v1 — O Problema Original (A Calculadora Rígida)
+A `CalculadoraDePrecos` instancia suas dependências diretamente (`new TabelaDePrecoPadrao()`, `new Frete()`).
+* **Problema:** Para adicionar uma nova tabela de preços ou frete, precisamos modificar a classe.
+* **Violação:** Não está aberta para extensão, nem fechada para modificação.
+
+### 📂 v2 — O Problema dos IFs (A Solução Errada)
+Quando surgem múltiplas regras, o desenvolvedor ingênuo adiciona `ifs`.
+* **Problema:** A classe vira uma God Class disfarçada, conhecendo todas as tabelas e fretes do sistema.
+* **Violação:** Cada nova regra exige abrir e modificar a classe (viola OCP).
+
+### 📂 v3 — A Calculadora Aberta (A Solução Correta)
+Criamos abstrações (`TabelaDePreco`, `ServicoDeEntrega`) e injetamos pelo construtor.
+* **✅ Aberta para extensão:** Novas tabelas e fretes podem ser criados sem tocar na Calculadora.
+* **✅ Fechada para modificação:** A Calculadora nunca mais precisa mudar.
+* **Bônus:** Testabilidade — podemos passar mocks pelo construtor.
+
+### 📂 v4 — Exemplo Real (Sistema de Exercícios da Caelum)
+Código real extraído da plataforma de ensino da Caelum.
+* **Antes:** `ShowAnswerHelper` cheio de `ifs` para cada tipo de exercício.
+* **Depois:** Polimorfismo puro — cada exercício sabe como se exibir através de `viewDetails()`.
+
+### 🎯 A Regra de Ouro do OCP
+
+> *"Seu sistema deve evoluir por meio de novos códigos, não de alterações em códigos já existentes."* — Maurício Aniche
+
+**Como conseguir:**
+1. Identifique o que muda (a variação)
+2. Crie uma abstração (interface)
+3. Injete pelo construtor (não instancie dentro da classe)
+
+**Por que construtor e não setter?**
+> "Construtores obrigam os clientes a passarem as dependências no momento da criação. O compilador fará o trabalho de avisá-lo."
+
+### 🧪 Testabilidade: O Termômetro do Design
+
+> *"Se está difícil de testar, é porque seu código pode ser melhorado."* — Maurício Aniche
+
+Classes abertas (OCP) são facilmente testáveis:
+* **v1 (Rígida):** Forçados a testar junto com dependências concretas.
+* **v3 (Aberta):** Passamos mocks pelo construtor, isolando a lógica.
+
+### ⚖️ IFs Nunca Mais? Abstrações Sempre?
+
+> "Talvez não. Códigos flexíveis têm um custo agregado: eles são mais complexos. Muitas vezes um simples IF resolve o problema. Portanto, seja parcimonioso."
+
+**Regra prática:** Se uma variação já ocorreu mais de uma vez, ou se é previsível que ocorra, crie a abstração. Caso contrário, o IF pode ser mais simples.
+
+---
+
+## 📊 Resumo dos Princípios SOLID Abordados
+
+| Sigla | Princípio | Capítulo | Aplicação |
+| :---: | :--- | :---: | :--- |
+| **S** | Single Responsibility | 2 | Classes de regra separadas, cada uma com uma única razão para mudar |
+| **O** | Open/Closed | 4 | Calculadora aberta para extensão (novas tabelas/fretes) sem modificação |
+| **L** | Liskov Substitution | 2, 4 | Qualquer implementação pode substituir outra sem quebrar o sistema |
+| **I** | Interface Segregation | 2 | A máscara `DadosParaCalculo` protege o objeto `Funcionario` |
+| **D** | Dependency Inversion | 3, 4 | Dependemos de abstrações (interfaces), não de implementações concretas |
+
+---
+
+## 📁 Estrutura do Projeto
+
+```
+oo-solid-ninjas/
+├── src/
+│   ├── main/java/
+│   │   ├── capitulo1_mindset/          # OO vs Procedural
+│   │   ├── capitulo2_coesao/           # SRP e Strategy Pattern
+│   │   │   ├── v1_a_maldicao_god_class/
+│   │   │   ├── v2_o_sinal_strategy/
+│   │   │   ├── v3_o_elixir_enum/
+│   │   │   └── v4_a_mascara_isp/
+│   │   ├── capitulo3_acoplamento/      # DIP e Arquitetura Hexagonal
+│   │   │   ├── v1_acoplamento_concreto/
+│   │   │   ├── v2_inversao_dependencia/
+│   │   │   └── v3_dip_completo/
+│   │   ├── capitulo4_ocp/              # Open/Closed Principle
+│   │   │   ├── v1_o_problema/
+│   │   │   ├── v2_o_problema_dos_ifs/
+│   │   │   ├── v3_calculadora_aberta/
+│   │   │   └── v4_exemplo_real/
+│   │   └── infra/                      # Utilitários (Console UTF-8)
+│   └── test/java/
+│       ├── capitulo2_coesao/           # Testes unitários do Cap. 2
+│       ├── capitulo3_acoplamento/      # Testes unitários + ArchUnit
+│       └── capitulo4_ocp/              # Testes com Mocks
+└── README.md
+```
+
+**Cada capítulo possui:**
+- 📄 `README.md` — Explicação detalhada da evolução
+- 🎯 `Simulador*.java` — Classe main para executar os exemplos
+- ✅ Testes unitários correspondentes
+
+---
+
+## 🚀 Como Executar
+
+### Executar os Simuladores (Main Classes)
+
+```bash
+# Capítulo 1 - Comparação OO vs Procedural
+./gradlew run --args="capitulo1_mindset.BatalhaOO"
+
+# Capítulo 2 - Evolução da Coesão
+./gradlew run --args="capitulo2_coesao.SimuladorDeBatalha"
+
+# Capítulo 3 - Acoplamento e DIP
+./gradlew run --args="capitulo3_acoplamento.SimuladorDeAcoplamento"
+
+# Capítulo 4 - Open/Closed Principle
+./gradlew run --args="capitulo4_ocp.SimuladorDeOCP"
+```
+
+### Executar os Testes
+
+```bash
+# Todos os testes
+./gradlew test
+
+# Testes de um capítulo específico
+./gradlew test --tests "capitulo2_coesao.*"
+./gradlew test --tests "capitulo3_acoplamento.*"
+./gradlew test --tests "capitulo4_ocp.*"
+
+# Teste arquitetural (ArchUnit)
+./gradlew test --tests "capitulo3_acoplamento.ArquiteturaTest"
+```
+
+### Build do Projeto
+
+```bash
+# Compilar
+./gradlew build
+
+# Limpar e recompilar
+./gradlew clean build
+```
+
+---
+
 ## 🛠️ Tecnologias e Ferramentas
 
 * **Java 21** (A linguagem antiga)
+* **Gradle** (O construtor de artefatos)
 * **JUnit 5** (A prova dos 9)
 * **Mockito** (O mestre dos disfarces)
 * **ArchUnit** (O guardião da arquitetura)
 * **IntelliJ IDEA** (O laboratório)
 
-> “Vá, programe, e que seu código seja limpo como a lâmina de Geralt.”
+---
+
+## 📚 Sobre o Livro
+
+**Título:** Orientação a Objetos e SOLID para Ninjas  
+**Autor:** Maurício Aniche  
+**Editora:** Casa do Código
+
+Este repositório é um registro de aprendizado pessoal, adaptando os conceitos do livro para uma narrativa temática do universo The Witcher.
+
+---
+
+> "Vá, programe, e que seu código seja limpo como a lâmina de Geralt."
