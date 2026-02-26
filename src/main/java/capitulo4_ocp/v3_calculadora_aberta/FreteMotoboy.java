@@ -16,7 +16,7 @@ package capitulo4_ocp.v3_calculadora_aberta;
  * - Outras: não operam (lança exceção)
  */
 
-class FreteMotoboy implements ServicoDeEntrega {
+public class FreteMotoboy implements ServicoDeEntrega {
     @Override
     public double para(String cidade) {
         if ("SÃO PAULO".equals(cidade.toUpperCase())) {

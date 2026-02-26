@@ -16,7 +16,7 @@ package capitulo4_ocp.v3_calculadora_aberta;
  * - Demais: sem desconto
  */
 
-class TabelaPrecoPadrao implements TabelaDePreco {
+public class TabelaPrecoPadrao implements TabelaDePreco {
     @Override
     public double descontoPara(double valor) {
         if (valor > 5000) return 0.03;
