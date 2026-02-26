@@ -70,8 +70,34 @@ A calculadora agora está **aberta para extensão** (novas tabelas e fretes) e *
 
 ### v4 — Exemplo Real (O Sistema de Exercícios da Caelum)
 
-Código real extraído da plataforma de ensino da Caelum.  
+Código real extraído da plataforma de ensino da Caelum.
 `ShowAnswerHelper` com `ifs` para cada tipo de exercício → refatorado com `ExerciseViewDetails`.
+
+---
+
+## ⚔️ Crônicas do Concílio: A Busca pela Elegância (V5 e V6)
+
+Durante o clube de leitura, surgiu a dúvida: *"Ok, a Calculadora V3 está limpa, mas onde ficam os IFs que decidem qual regra usar? Como fazemos isso na vida real?"*
+
+Isso nos levou a criar duas novas versões avançadas:
+
+### 🏭 v5_calculadora_factory (A Forja de Armas)
+Criamos uma classe **Factory** (`CalculadoraFactory`) responsável por fabricar a Calculadora.
+* **Como funciona:** A Factory recebe o tipo de cliente ("VIP", "COMUM") e decide qual implementação instanciar.
+* **Vantagem:** Centraliza a complexidade de criação em um único lugar.
+* **Limitação:** A própria Factory ainda tem `if/else` e viola o OCP (se surgir um novo cliente, editamos a Factory).
+
+### 🚀 v6_calculadora_strategy_map (A Solução Definitiva com Spring)
+Aqui atingimos o nível **Ninja Supremo**. Usamos o poder do **Spring Boot** para eliminar *todos* os IFs.
+
+* **A Mágica:**
+    1. Criamos as implementações (`FreteCorreios`, `FreteGratis`) e as anotamos com `@Component("NOME")`.
+    2. O Spring injeta automaticamente todas elas em um `Map<String, ServicoDeEntrega>`.
+    3. O `CalculadoraService` apenas busca no mapa: `mapa.get("GRATIS")`.
+
+* **Resultado:**
+    * **Zero IFs:** A decisão é feita por lookup no mapa.
+    * **Extensibilidade Infinita:** Quer um novo frete? Crie a classe `FreteDrone`, anote com `@Component("DRONE")` e pronto. Não precisa tocar em nenhuma outra classe. O sistema detecta o novo plugin automaticamente.
 
 ---
 
@@ -126,7 +152,7 @@ Sem OCP, somos forçados a testar a Calculadora junto com todas as suas dependê
 
 O livro faz uma ressalva importante:
 
-> "Talvez não. Códigos flexíveis são importantes, têm um custo agregado: eles são mais complexos. Muitas vezes um simples IF resolve o problema. Portanto, seja parcimonioso. Flexibilize código que realmente precise disso."
+> "A resposta, talvez para a sua surpresa, é: talvez não. [...] Códigos muito flexíveis, cheios de abstrações e prontos para acomodar qualquer mudança têm um custo agregado: eles são mais complexos. É o que chamamos de complexidade acidental. [...] Seja parcimonioso. Flexibilize apenas as partes do seu sistema que realmente precisam disso."
 
 **Regra prática:** Se uma variação já ocorreu mais de uma vez, ou se é previsível que ocorra, crie a abstração. Caso contrário, o IF pode ser mais simples.
 

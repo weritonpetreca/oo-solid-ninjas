@@ -11,13 +11,15 @@ repositories {
 }
 
 dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-web:3.2.3")
+    testImplementation("io.rest-assured:rest-assured:5.4.0")
     testImplementation("com.tngtech.archunit:archunit-junit5:1.2.1")
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.mockito:mockito-core:5.11.0")
     testImplementation("org.mockito:mockito-junit-jupiter:5.11.0")
+    testImplementation("org.springframework.boot:spring-boot-starter-test:3.2.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testRuntimeOnly("org.slf4j:slf4j-simple:2.0.9")
 }
 
 application {

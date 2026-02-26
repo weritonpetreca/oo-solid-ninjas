@@ -1,6 +1,7 @@
 package capitulo4_ocp;
 
 import capitulo4_ocp.v3_calculadora_aberta.*;
+import capitulo4_ocp.v5_calculadora_factory.factories.CalculadoraFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -174,6 +175,110 @@ class CalculadoraV3Test {
         // Sem desconto + sem frete = preço original
         assertEquals(5000.0, resultado, 0.001);
     }
+}
 
+// =============================================================================
+// TESTES DA V5 (IMPLEMENTANDO FACTORY)
+// =============================================================================
 
+/**
+ * 🧪 O TESTE DA FÁBRICA (FACTORY & DIP)
+ *
+ * Aqui testamos a V5, que combina Factory com DIP.
+ *
+ * 🛡️ O QUE ESTAMOS TESTANDO?
+ * 1. Teste Unitário do Use Case: Garantimos que a Calculadora funciona com QUALQUER tabela/frete (Mocks).
+ * 2. Teste de Integração da Factory: Garantimos que a Factory monta o objeto corretamente.
+ */
+@ExtendWith(MockitoExtension.class)
+@DisplayName("🏭 Testes v5: A Calculadora com Factory (DIP)")
+class CalculadoraV5Test {
+
+    @Mock
+    private capitulo4_ocp.v5_calculadora_factory.ports.TabelaDePreco tabelaMock;
+    @Mock
+    private capitulo4_ocp.v5_calculadora_factory.ports.ServicoDeEntrega freteMock;
+
+    /**
+     * TESTE 1: O USE CASE (ISOLADO)
+     * Testamos a lógica da CalculadoraDePrecos usando Mocks.
+     * Isso prova que ela segue o DIP (não depende de implementações concretas).
+     */
+    @Test
+    @DisplayName("Use Case: Deve calcular o preço com dependências mockadas")
+    void deveCalcularPrecoComDescontoEFreteMockados() {
+        // 1. ARRANGE
+        capitulo4_ocp.v5_calculadora_factory.usecases.CalculadoraDePrecos calculadora =
+                new capitulo4_ocp.v5_calculadora_factory.usecases.CalculadoraDePrecos(tabelaMock, freteMock);
+        capitulo4_ocp.v5_calculadora_factory.domain.Compra compra =
+                new capitulo4_ocp.v5_calculadora_factory.domain.Compra(
+                        "Espada de Prata", 1000.0, "Novigrad"
+                );
+
+        // Ensinamos os mocks
+        when(tabelaMock.descontoPara(1000.0)).thenReturn(0.10); // 10% de desconto
+        when(freteMock.para("Novigrad")).thenReturn(50.0);      // 50 de frete
+
+        // 2. ACT
+        double resultado = calculadora.calcula(compra);
+
+        // 3. ASSERT
+        // Conta: 1000 * (1 - 0.10) + 50 = 900 + 50 = 950
+        assertEquals(950.0, resultado);
+    }
+
+    /**
+     * TESTE 2: A FACTORY (INTEGRAÇÃO)
+     * Testamos se a Factory cria a combinação correta para um cliente VIP com Frete Grátis.
+     * Aqui usamos as implementações REAIS (Adapters) para ver se a cola funcionou.
+     */
+    @Test
+    @DisplayName("Factory: Deve montar a calculadora para Cliente VIP com Frete Grátis")
+    void deveCalcularParaClienteVipComFreteGratis() {
+        // 1. ARRANGE
+        CalculadoraFactory factory = new CalculadoraFactory();
+        capitulo4_ocp.v5_calculadora_factory.usecases.CalculadoraDePrecos calculadora =
+                factory.criar("VIP", "GRATIS");
+        capitulo4_ocp.v5_calculadora_factory.domain.Compra compra =
+                new capitulo4_ocp.v5_calculadora_factory.domain.Compra(
+                        "Poção", 100.0, "Qualquer Lugar"
+                );
+
+        // VIP tem 15% de desconto (TabelaDePrecoVip)
+        // Frete Gratis é 0 (FreteGratis)
+
+        // 2. ACT
+        double resultado = calculadora.calcula(compra);
+
+        // 3. ASSERT
+        // Conta: 100 * (1 - 0.15) + 0 = 85
+        assertEquals(85.0, resultado);
+    }
+
+    /**
+     * TESTE 3: A FACTORY (INTEGRAÇÃO - CENÁRIO PADRÃO)
+     * Testamos o cenário comum: Sem desconto e com Frete Correios.
+     */
+    @Test
+    @DisplayName("Factory: Deve montar a calculadora para Cliente Comum com Frete Pago")
+    void deveCalcularParaClienteComumComFreteCorreios() {
+        // 1. ARRANGE
+        CalculadoraFactory factory = new CalculadoraFactory();
+        capitulo4_ocp.v5_calculadora_factory.usecases.CalculadoraDePrecos calculadora =
+                factory.criar("COMUM", "PAGO");
+        capitulo4_ocp.v5_calculadora_factory.domain.Compra compra =
+                new capitulo4_ocp.v5_calculadora_factory.domain.Compra(
+                        "Livro", 100.0, "SÃO PAULO"
+                );
+
+        // Comum tem 0% de desconto (TabelaSemDesconto)
+        // Frete Correios para SP é 15.0 (FreteCorreios)
+
+        // 2. ACT
+        double resultado = calculadora.calcula(compra);
+
+        // 3. ASSERT
+        // Conta: 100 * (1 - 0.0) + 15 = 115
+        assertEquals(115.0, resultado);
+    }
 }

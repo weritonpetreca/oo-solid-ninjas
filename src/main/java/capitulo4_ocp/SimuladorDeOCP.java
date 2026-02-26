@@ -4,6 +4,8 @@ import capitulo4_ocp.v1_o_problema.Compra;
 import capitulo4_ocp.v1_o_problema.TabelaDePrecoPadrao;
 import capitulo4_ocp.v3_calculadora_aberta.*;
 import capitulo4_ocp.v4_exemplo_real.*;
+import capitulo4_ocp.v5_calculadora_factory.factories.CalculadoraFactory;
+import capitulo4_ocp.v5_calculadora_factory.usecases.CalculadoraDePrecos;
 
 /**
  * ⚔️ SIMULADOR DO OCP — O CAMPO DE BATALHA DO CAPÍTULO 4
@@ -12,6 +14,7 @@ import capitulo4_ocp.v4_exemplo_real.*;
  *
  * BATALHA A: CalculadoraDePrecos — A jornada da rigidez para a abertura
  * BATALHA B: Sistema de Exercícios — O exemplo real da Caelum
+ * BATALHA C: Padrão Factory — Isolando a criação das regras de negócio
  *
  * @author Weriton L. Petreca
  */
@@ -28,6 +31,8 @@ public class SimuladorDeOCP {
         executarBatalhaA();
         System.out.println("\n==================================================\n");
         executarBatalhaB();
+        System.out.println("\n==================================================\n");
+        executarBatalhaC();
     }
 
     // ==================================================================================
@@ -138,5 +143,41 @@ public class SimuladorDeOCP {
         System.out.println("✅ OCP: Para adicionar 'ExercícioDeVídeo', basta criar a classe.");
         System.out.println("✅ ShowAnswerHelper NUNCA precisará ser modificado.");
         System.out.println("✅ O compilador GARANTE que o novo tipo implementa viewDetails().");
+    }
+
+    // ==================================================================================
+    // BATALHA C: O PADRÃO FACTORY (QUEM CRIA AS DEPENDÊNCIAS?)
+    // ==================================================================================
+
+    private static void executarBatalhaC() {
+        System.out.println("--- [BATALHA C] O PADRÃO FACTORY (V5 - OCP AVANÇADO) ---\n");
+
+        System.out.println(">>> CENÁRIO C1: Isolando a criação com uma Factory");
+        System.out.println("    A Calculadora não sabe criar regras. Quem chama também não precisa saber.");
+        System.out.println("    A responsabilidade de conter os 'IFs' fica na Factory.\n");
+
+        capitulo4_ocp.v5_calculadora_factory.domain.Compra compra =
+                new capitulo4_ocp.v5_calculadora_factory.domain.Compra("Besta de Mão", 1500.0, "São Paulo");
+
+        CalculadoraFactory factory = new CalculadoraFactory();
+
+        // Passamos apenas Strings (que poderiam vir de uma API, banco de dados, ou tela do usuário)
+        CalculadoraDePrecos calcPadrao = factory.criar("PADRAO", "CORREIOS");
+        double totalPadrao = calcPadrao.calcula(compra);
+
+        System.out.println("-- Combinação montada pela Factory (Padrão + Correios):");
+        System.out.println("   Compra: " + compra.getProduto() + " | Valor: R$" + compra.getValor());
+        System.out.println("   Total: R$" + totalPadrao);
+
+        CalculadoraDePrecos calcVip = factory.criar("VIP", "GRATIS");
+        double totalVip = calcVip.calcula(compra);
+
+        System.out.println("\n-- Combinação montada pela Factory (VIP + Grátis):");
+        System.out.println("   Compra: " + compra.getProduto() + " | Valor: R$" + compra.getValor());
+        System.out.println("   Total: R$" + totalVip);
+
+        System.out.println();
+        System.out.println("✅ SRP + OCP: A Calculadora faz o cálculo. A Fábrica toma a decisão de criação.");
+        System.out.println("✅ O código cliente (este Simulador) ficou livre de instanciar classes concretas!");
     }
 }

@@ -64,7 +64,7 @@ public class ShowAnswerHelperComIfs {
 
     }
 
-    public boolean isMultipleChouce(ExercicioLegado exercise) { return exercise.getType().equals(MULTIPLE_TYPE); }
+    public boolean isMultipleChoice(ExercicioLegado exercise) { return exercise.getType().equals(MULTIPLE_TYPE); }
 
     public boolean isOpenAnswer(ExercicioLegado exercise) {
         return exercise.getType().equals(OPEN_TYPE)

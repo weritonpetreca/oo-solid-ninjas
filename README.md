@@ -92,7 +92,7 @@ Ao separar a `RegraDeCalculo` (Lógica de Negócio) da `Calculadora/Controller` 
 
 O **Open/Closed Principle (OCP)** é o segundo dos princípios SOLID. Este capítulo ensina como fazer o sistema evoluir sem precisar mexer no que já funciona.
 
-Visitando a pasta `capitulo4_ocp`, você verá a evolução em 4 estágios:
+Visitando a pasta `capitulo4_ocp`, você verá a evolução retratada pelo livro em 4 estágios:
 
 ### 📂 v1 — O Problema Original (A Calculadora Rígida)
 A `CalculadoraDePrecos` instancia suas dependências diretamente (`new TabelaDePrecoPadrao()`, `new Frete()`).
@@ -114,6 +114,30 @@ Criamos abstrações (`TabelaDePreco`, `ServicoDeEntrega`) e injetamos pelo cons
 Código real extraído da plataforma de ensino da Caelum.
 * **Antes:** `ShowAnswerHelper` cheio de `ifs` para cada tipo de exercício.
 * **Depois:** Polimorfismo puro — cada exercício sabe como se exibir através de `viewDetails()`.
+
+### ⚔️ Crônicas do Concílio: A Busca pela Elegância (V5 e V6)
+
+Durante o clube de leitura, surgiu a dúvida: *"Ok, a Calculadora V3 está limpa, mas onde ficam os IFs que decidem qual regra usar? Como fazemos isso na vida real?"*
+
+Isso nos levou a criar duas novas versões avançadas:
+
+### 🏭 v5_calculadora_factory (A Forja de Armas)
+Criamos uma classe **Factory** (`CalculadoraFactory`) responsável por fabricar a Calculadora.
+* **Como funciona:** A Factory recebe o tipo de cliente ("VIP", "COMUM") e decide qual implementação instanciar.
+* **Vantagem:** Centraliza a complexidade de criação em um único lugar.
+* **Limitação:** A própria Factory ainda tem `if/else` e viola o OCP (se surgir um novo cliente, editamos a Factory).
+
+### 🚀 v6_calculadora_strategy_map (A Solução Definitiva com Spring)
+Aqui atingimos o nível **Ninja Supremo**. Usamos o poder do **Spring Boot** para eliminar *todos* os IFs.
+
+* **A Mágica:**
+    1. Criamos as implementações (`FreteCorreios`, `FreteGratis`) e as anotamos com `@Component("NOME")`.
+    2. O Spring injeta automaticamente todas elas em um `Map<String, ServicoDeEntrega>`.
+    3. O `CalculadoraService` apenas busca no mapa: `mapa.get("GRATIS")`.
+
+* **Resultado:**
+    * **Zero IFs:** A decisão é feita por lookup no mapa.
+    * **Extensibilidade Infinita:** Quer um novo frete? Crie a classe `FreteDrone`, anote com `@Component("DRONE")` e pronto. Não precisa tocar em nenhuma outra classe. O sistema detecta o novo plugin automaticamente.
 
 ### 🎯 A Regra de Ouro do OCP
 
@@ -175,12 +199,15 @@ oo-solid-ninjas/
 │   │   │   ├── v1_o_problema/
 │   │   │   ├── v2_o_problema_dos_ifs/
 │   │   │   ├── v3_calculadora_aberta/
-│   │   │   └── v4_exemplo_real/
+│   │   │   ├── v4_exemplo_real/
+│   │   │   ├── v5_calculadora_factory/ # Factory Pattern
+│   │   │   └── v6_calculadora_strategy_map/ # Spring Strategy Map
 │   │   └── infra/                      # Utilitários (Console UTF-8)
 │   └── test/java/
 │       ├── capitulo2_coesao/           # Testes unitários do Cap. 2
 │       ├── capitulo3_acoplamento/      # Testes unitários + ArchUnit
-│       └── capitulo4_ocp/              # Testes com Mocks
+│       └── capitulo4_ocp/              # Testes com Mocks e Integração
+│           └── v6_calculadora_strategy_map/ # Testes de Integração Spring
 └── README.md
 ```
 
@@ -239,9 +266,11 @@ oo-solid-ninjas/
 ## 🛠️ Tecnologias e Ferramentas
 
 * **Java 21** (A linguagem antiga)
+* **Spring Boot** (A magia moderna)
 * **Gradle** (O construtor de artefatos)
 * **JUnit 5** (A prova dos 9)
 * **Mockito** (O mestre dos disfarces)
+* **REST Assured** (Testes de API)
 * **ArchUnit** (O guardião da arquitetura)
 * **IntelliJ IDEA** (O laboratório)
 
@@ -249,8 +278,8 @@ oo-solid-ninjas/
 
 ## 📚 Sobre o Livro
 
-**Título:** Orientação a Objetos e SOLID para Ninjas  
-**Autor:** Maurício Aniche  
+**Título:** Orientação a Objetos e SOLID para Ninjas
+**Autor:** Maurício Aniche
 **Editora:** Casa do Código
 
 Este repositório é um registro de aprendizado pessoal, adaptando os conceitos do livro para uma narrativa temática do universo The Witcher.
