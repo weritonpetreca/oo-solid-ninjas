@@ -167,6 +167,59 @@ Classes abertas (OCP) são facilmente testáveis:
 
 ---
 
+## 🔒 Capítulo 5: Encapsulamento e Propagação de Mudanças
+
+> *"O lobo branco não pergunta ao monstro como ele ataca. Ele o estuda, aprende o padrão, e age. Código bem encapsulado funciona igual: você sabe o que ele faz, mas não precisa saber como."*
+
+Encapsulamento não é só `private` nos atributos. É **esconder o COMO e expor só o QUÊ**.
+
+Visitando a pasta `capitulo5_encapsulamento`, exploramos 5 versões:
+
+### 📂 v1 — Problema de Encapsulamento
+A `Fatura` expõe sua lista interna de pagamentos diretamente.
+* **Problema 1:** `fatura.getPagamentos().add(pagamento)` — qualquer um modifica a lista.
+* **Problema 2:** A regra "quando a fatura está paga" vive FORA da Fatura (no `ProcessadorDeBoletos`).
+* **Consequência:** Propagação de mudanças descontrolada — a regra é duplicada em vários processadores.
+
+### 📂 v2 — Intimidade Inapropriada
+O `CalculadorDeImposto` sabe demais sobre `NotaFiscal`.
+* **Problema:** `if (nf.getValorSemImposto() > 10000)` — a regra fiscal vive fora da NotaFiscal.
+* **Solução:** **Tell, Don't Ask** — `nf.calculaValorImposto()` encapsula a regra.
+
+### 📂 v3 — Lei de Demeter
+O `ServicoDeCobranca` viola a Lei de Demeter.
+* **Problema:** `fatura.getCliente().marcaComoInadimplente()` — getter encadeado cria acoplamento oculto.
+* **Solução:** `fatura.marcaComoInadimplente()` — a Fatura encapsula o acesso ao Cliente.
+
+### 📂 v4 — Solução Completa (Modelo Rico)
+A `Fatura` encapsulada com todas as boas práticas:
+* ✅ `adicionaPagamento()` — única porta de entrada, decide sozinha quando está paga.
+* ✅ `getPagamentos()` retorna lista imutável — ninguém modifica externamente.
+* ✅ `setPago()` removido — não há razão para existir.
+
+### 📂 v5 — Modelo Anêmico (Antipadrão)
+Demonstração do que **NÃO fazer**:
+* ❌ Classe de dados sem comportamento (`Fatura` só com getters/setters).
+* ❌ Lógica separada em classes de serviço (`FaturaBLL`, `FaturaService`).
+* ❌ Código procedural disfarçado de OO.
+
+### 🎯 Conceitos Chave do Capítulo
+
+**Tell, Don't Ask:**
+> Não pergunte ao objeto para depois tomar uma decisão. Diga a ele o que fazer.
+
+**Lei de Demeter:**
+> Fale apenas com seus amigos imediatos. Evite `a.getB().getC().metodo()`.
+
+**Getters Perigosos:**
+> Retornar listas mutáveis é abrir a porta dos fundos. Use `Collections.unmodifiableList()`.
+
+**Teste do Encapsulamento (Aniche, seção 5.5):**
+- **O quê** esse método faz? → Você deve conseguir responder pelo nome.
+- **Como** ele faz? → Você **não** deve conseguir responder só olhando de fora.
+
+---
+
 ## 📊 Resumo dos Princípios SOLID Abordados
 
 | Sigla | Princípio | Capítulo | Aplicação |
@@ -202,12 +255,19 @@ oo-solid-ninjas/
 │   │   │   ├── v4_exemplo_real/
 │   │   │   ├── v5_calculadora_factory/ # Factory Pattern
 │   │   │   └── v6_calculadora_strategy_map/ # Spring Strategy Map
+│   │   ├── capitulo5_encapsulamento/   # Encapsulamento e Tell Don't Ask
+│   │   │   ├── v1_problema_encapsulamento/
+│   │   │   ├── v2_intimidade_inapropriada/
+│   │   │   ├── v3_lei_de_demeter/
+│   │   │   ├── v4_solucao_completa/
+│   │   │   └── v5_modelo_anemico/
 │   │   └── infra/                      # Utilitários (Console UTF-8)
 │   └── test/java/
 │       ├── capitulo2_coesao/           # Testes unitários do Cap. 2
 │       ├── capitulo3_acoplamento/      # Testes unitários + ArchUnit
-│       └── capitulo4_ocp/              # Testes com Mocks e Integração
-│           └── v6_calculadora_strategy_map/ # Testes de Integração Spring
+│       ├── capitulo4_ocp/              # Testes com Mocks e Integração
+│       │   └── v6_calculadora_strategy_map/ # Testes de Integração Spring
+│       └── capitulo5_encapsulamento/   # Testes de Encapsulamento
 └── README.md
 ```
 
@@ -234,6 +294,9 @@ oo-solid-ninjas/
 
 # Capítulo 4 - Open/Closed Principle
 ./gradlew run --args="capitulo4_ocp.SimuladorDeOCP"
+
+# Capítulo 5 - Encapsulamento
+./gradlew run --args="capitulo5_encapsulamento.SimuladorDeEncapsulamento"
 ```
 
 ### Executar os Testes
@@ -246,6 +309,7 @@ oo-solid-ninjas/
 ./gradlew test --tests "capitulo2_coesao.*"
 ./gradlew test --tests "capitulo3_acoplamento.*"
 ./gradlew test --tests "capitulo4_ocp.*"
+./gradlew test --tests "capitulo5_encapsulamento.*"
 
 # Teste arquitetural (ArchUnit)
 ./gradlew test --tests "capitulo3_acoplamento.ArquiteturaTest"
