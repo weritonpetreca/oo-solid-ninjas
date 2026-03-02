@@ -1,0 +1,20 @@
+package capitulo5_encapsulamento.v1_problema_encapsulamento;
+
+public class Boleto {
+
+    private double valor;
+    private String codigo;
+
+    public Boleto(String codigo, double valor) {
+        this.codigo = codigo;
+        this.valor = valor;
+    }
+
+    public double getValor() {
+        return valor;
+    }
+
+    public String getCodigo() {
+        return codigo;
+    }
+}
