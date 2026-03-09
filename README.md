@@ -220,13 +220,69 @@ Demonstração do que **NÃO fazer**:
 
 ---
 
+## 🧬 Capítulo 6: O Dilema do Sangue (Herança vs. Composição)
+
+> *"Herança é como uma maldição de sangue: você herda os poderes do seu pai, mas também suas fraquezas. Composição é como escolher suas armas: você pega apenas o que precisa para a caçada."*
+
+Neste capítulo, exploramos o **Liskov Substitution Principle (LSP)** e o eterno debate entre estender classes ou compor comportamentos.
+
+Visitando a pasta `capitulo6_heranca_composicao`, exploramos 6 versões:
+
+### 📂 v1 — A Maldição da Herança (LSP Violado)
+A tentativa ingênua de reutilizar código através da herança leva à quebra de contratos.
+* **Problema:** `ContaDeEstudante` herda de `ContaComum`, mas não rende juros.
+* **Violação LSP:** Lança exceção onde o pai não lançava — quebra o contrato.
+
+### 📂 v2 — O Dilema Geométrico (Quadrado é Retângulo?)
+Matematicamente, todo quadrado é um retângulo. Em OO, **isso é uma mentira**.
+* **Problema:** `Quadrado` sobrescreve setters para manter lados iguais, causando efeitos colaterais inesperados.
+* **Violação LSP:** Quem usa `Retangulo` não espera que mudar a largura afete a altura.
+
+### 📂 v3 — O Acoplamento de Sangue (Pai e Filho)
+Herança cria o acoplamento mais forte possível em OO. Se o pai muda, o filho pode quebrar.
+* **Problema:** `Gerente` usa `super.bonus()` e depende da implementação interna do pai.
+* **Solução:** O filho deve implementar sua regra de forma explícita e independente.
+
+### 📂 v4 — A Cura pela Composição
+Em vez de "ser uma" Conta Comum, ambas as contas "têm um" `ManipuladorDeSaldo`.
+* **Vantagens:** Segurança (não expõe métodos indevidos), reuso, testabilidade.
+* **Princípio:** "Favoreça a composição sobre a herança." — Gang of Four
+
+### 📂 v5 — O Pergaminho Antigo (Herança para DSLs)
+Existe um caso onde a herança é aceitável: **Testes e DSLs**.
+* **Uso:** Esconder complexidade do Selenium/WebDriver criando linguagem fluente.
+* **Veredito:** Em testes, a legibilidade vale o preço do acoplamento.
+
+### 📂 v6 — O Mundo Real (A Guilda do Leão)
+Aplicação completa unindo Herança e Composição em cenário de RPG.
+* **Herança (onde faz sentido):** Todos são `Cacador`, compartilham atributos estáveis.
+* **Composição (onde varia):** Taxa da guilda injetada como estratégia `CalculadorDeTaxa`.
+* **Resultado:** `Bruxo`, `Mago` e `Arqueiro` com regras próprias, sem duplicação.
+
+### 🎯 Conceitos Chave do Capítulo
+
+**Liskov Substitution Principle (LSP):**
+> A subclasse não pode exigir mais (pré-condições mais fortes) nem entregar menos (pós-condições mais fracas) que o pai.
+
+**Quando usar Herança:**
+- Relação "**é um**" verdadeira (Bruxo **é um** Caçador)
+- Comportamento compartilhado estável
+- LSP respeitado (substituição sem quebrar)
+
+**Quando usar Composição:**
+- Relação "**tem um**" (Conta **tem um** Manipulador)
+- Comportamento variável ou plugável
+- Evitar acoplamento forte
+
+---
+
 ## 📊 Resumo dos Princípios SOLID Abordados
 
 | Sigla | Princípio | Capítulo | Aplicação |
 | :---: | :--- | :---: | :--- |
 | **S** | Single Responsibility | 2 | Classes de regra separadas, cada uma com uma única razão para mudar |
 | **O** | Open/Closed | 4 | Calculadora aberta para extensão (novas tabelas/fretes) sem modificação |
-| **L** | Liskov Substitution | 2, 4 | Qualquer implementação pode substituir outra sem quebrar o sistema |
+| **L** | Liskov Substitution | 2, 4, 6 | Subclasses podem substituir a classe base sem quebrar o sistema |
 | **I** | Interface Segregation | 2 | A máscara `DadosParaCalculo` protege o objeto `Funcionario` |
 | **D** | Dependency Inversion | 3, 4 | Dependemos de abstrações (interfaces), não de implementações concretas |
 
@@ -261,6 +317,13 @@ oo-solid-ninjas/
 │   │   │   ├── v3_lei_de_demeter/
 │   │   │   ├── v4_solucao_completa/
 │   │   │   └── v5_modelo_anemico/
+│   │   ├── capitulo6_heranca_composicao/ # LSP e Herança vs Composição
+│   │   │   ├── v1_lsp_violacao/
+│   │   │   ├── v2_lsp_quadrado_retangulo/
+│   │   │   ├── v3_acoplamento_pai_filho/
+│   │   │   ├── v4_composicao/
+│   │   │   ├── v5_heranca_dsl/
+│   │   │   └── v6_mundo_real/
 │   │   └── infra/                      # Utilitários (Console UTF-8)
 │   └── test/java/
 │       ├── capitulo2_coesao/           # Testes unitários do Cap. 2
@@ -297,6 +360,9 @@ oo-solid-ninjas/
 
 # Capítulo 5 - Encapsulamento
 ./gradlew run --args="capitulo5_encapsulamento.SimuladorDeEncapsulamento"
+
+# Capítulo 6 - Herança vs Composição
+./gradlew run --args="capitulo6_heranca_composicao.SimuladorDeHeranca"
 ```
 
 ### Executar os Testes
@@ -310,6 +376,7 @@ oo-solid-ninjas/
 ./gradlew test --tests "capitulo3_acoplamento.*"
 ./gradlew test --tests "capitulo4_ocp.*"
 ./gradlew test --tests "capitulo5_encapsulamento.*"
+./gradlew test --tests "capitulo6_heranca_composicao.*"
 
 # Teste arquitetural (ArchUnit)
 ./gradlew test --tests "capitulo3_acoplamento.ArquiteturaTest"
