@@ -92,7 +92,7 @@ Ao separar a `RegraDeCalculo` (Lógica de Negócio) da `Calculadora/Controller` 
 
 O **Open/Closed Principle (OCP)** é o segundo dos princípios SOLID. Este capítulo ensina como fazer o sistema evoluir sem precisar mexer no que já funciona.
 
-Visitando a pasta `capitulo4_ocp`, você verá a evolução retratada pelo livro em 4 estágios:
+Visitando a pasta `capitulo4_ocp`, você verá a evolução em 4 estágios:
 
 ### 📂 v1 — O Problema Original (A Calculadora Rígida)
 A `CalculadoraDePrecos` instancia suas dependências diretamente (`new TabelaDePrecoPadrao()`, `new Frete()`).
@@ -276,6 +276,50 @@ Aplicação completa unindo Herança e Composição em cenário de RPG.
 
 ---
 
+## ⚖️ Capítulo 7: Interfaces Magras e o tal do ISP
+
+> *"Uma espada de duas mãos é inútil para um ladino que precisa de uma adaga. Não force uma classe a carregar o peso de métodos que ela não usa."*
+
+O **Interface Segregation Principle (ISP)** prega que interfaces devem ser coesas e específicas.
+
+Visitando a pasta `capitulo7_interfaces_magras`, exploramos 5 versões:
+
+### 📂 v1 — Interface Gorda (Fat Interface)
+A interface `Imposto` obrigava a implementar `geraNota()` e `imposto()`.
+* **Problema:** O imposto `IXMX` não gera nota.
+* **Gambiarra:** A classe `IXMX` lança `NaoGeraNotaException` ou retorna `null`. Isso polui o código.
+
+### 📂 v2 — Interfaces Coesas
+Dividimos a interface gorda em duas magras: `CalculadorDeImposto` e `GeradorDeNota`.
+* **Resultado:** `ISS` implementa ambas. `IXMX` implementa apenas `CalculadorDeImposto`. Ninguém é forçado a mentir.
+
+### 📂 v3 — Interface Mínima (Tributável)
+Em vez de o `CalculadorDeImposto` depender da classe gigante `NotaFiscal`, ele depende da interface mínima `Tributavel`.
+* **Ganho:** Desacoplamento. Podemos calcular imposto de qualquer coisa (Carro, Casa, Serviço) desde que implemente `Tributavel`.
+
+### 📂 v4 — Repositório e Fábrica
+Aplicamos interfaces para infraestrutura.
+* **Repositório:** `RepositorioDeFaturas` (Interface) esconde o banco de dados.
+* **Fábrica:** `FabricaDeCalculadora` centraliza a criação de objetos complexos.
+
+### 📂 v5 — Exemplo Real (Sistema de Notificações)
+Um sistema onde canais de notificação (Email, SMS, Slack) são plugáveis.
+* **Interfaces Magras:** `Notificavel` (quem recebe) e `CanalDeNotificacao` (quem envia).
+* **Composição:** O `ServicoDeNotificacao` recebe uma lista de canais e dispara para todos.
+
+### 🎯 Conceitos Chave do Capítulo
+
+**Interface Segregation Principle (ISP):**
+> Clientes não devem ser forçados a depender de métodos que não usam.
+
+**Coesão de Interface:**
+> Uma interface deve ter uma única responsabilidade. Se ela faz duas coisas (calcula imposto E gera nota), ela deve ser quebrada.
+
+**Interface Mínima:**
+> Ao definir um parâmetro de método, peça o mínimo necessário (`Tributavel`), não o objeto inteiro (`NotaFiscal`).
+
+---
+
 ## 📊 Resumo dos Princípios SOLID Abordados
 
 | Sigla | Princípio | Capítulo | Aplicação |
@@ -283,8 +327,8 @@ Aplicação completa unindo Herança e Composição em cenário de RPG.
 | **S** | Single Responsibility | 2 | Classes de regra separadas, cada uma com uma única razão para mudar |
 | **O** | Open/Closed | 4 | Calculadora aberta para extensão (novas tabelas/fretes) sem modificação |
 | **L** | Liskov Substitution | 2, 4, 6 | Subclasses podem substituir a classe base sem quebrar o sistema |
-| **I** | Interface Segregation | 2 | A máscara `DadosParaCalculo` protege o objeto `Funcionario` |
-| **D** | Dependency Inversion | 3, 4 | Dependemos de abstrações (interfaces), não de implementações concretas |
+| **I** | Interface Segregation | 2, 7 | Interfaces magras (`Tributavel`, `DadosParaCalculo`) evitam acoplamento inútil |
+| **D** | Dependency Inversion | 3, 4, 7 | Dependemos de abstrações (interfaces), não de implementações concretas |
 
 ---
 
@@ -324,13 +368,21 @@ oo-solid-ninjas/
 │   │   │   ├── v4_composicao/
 │   │   │   ├── v5_heranca_dsl/
 │   │   │   └── v6_mundo_real/
+│   │   ├── capitulo7_interfaces_magras/ # ISP e Interfaces Coesas
+│   │   │   ├── v1_interface_gorda/
+│   │   │   ├── v2_interfaces_coesas/
+│   │   │   ├── v3_tributavel/
+│   │   │   ├── v4_repositorio_fabrica/
+│   │   │   └── v5_mundo_real/
 │   │   └── infra/                      # Utilitários (Console UTF-8)
 │   └── test/java/
 │       ├── capitulo2_coesao/           # Testes unitários do Cap. 2
 │       ├── capitulo3_acoplamento/      # Testes unitários + ArchUnit
 │       ├── capitulo4_ocp/              # Testes com Mocks e Integração
 │       │   └── v6_calculadora_strategy_map/ # Testes de Integração Spring
-│       └── capitulo5_encapsulamento/   # Testes de Encapsulamento
+│       ├── capitulo5_encapsulamento/   # Testes de Encapsulamento
+│       ├── capitulo6_heranca_composicao/ # Testes de Herança e LSP
+│       └── capitulo7_interfaces_magras/ # Testes de ISP
 └── README.md
 ```
 
@@ -363,6 +415,9 @@ oo-solid-ninjas/
 
 # Capítulo 6 - Herança vs Composição
 ./gradlew run --args="capitulo6_heranca_composicao.SimuladorDeHeranca"
+
+# Capítulo 7 - Interfaces Magras (ISP)
+./gradlew run --args="capitulo7_interfaces_magras.SimuladorDeInterfaces"
 ```
 
 ### Executar os Testes
@@ -377,6 +432,7 @@ oo-solid-ninjas/
 ./gradlew test --tests "capitulo4_ocp.*"
 ./gradlew test --tests "capitulo5_encapsulamento.*"
 ./gradlew test --tests "capitulo6_heranca_composicao.*"
+./gradlew test --tests "capitulo7_interfaces_magras.*"
 
 # Teste arquitetural (ArchUnit)
 ./gradlew test --tests "capitulo3_acoplamento.ArquiteturaTest"
