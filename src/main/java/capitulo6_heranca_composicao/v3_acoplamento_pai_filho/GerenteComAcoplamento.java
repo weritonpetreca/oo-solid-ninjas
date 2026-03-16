@@ -23,6 +23,7 @@ public class GerenteComAcoplamento extends Funcionario {
         this.placaDoCarro = placaDoCarro;
     }
 
+    @Override
     public double bonus() {
         // ❌ Depende da implementação do pai
         // Se Funcionario.bonus() mudar, este cálculo muda junto — silenciosamente
