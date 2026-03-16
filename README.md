@@ -320,6 +320,99 @@ Um sistema onde canais de notificação (Email, SMS, Slack) são plugáveis.
 
 ---
 
+## 🧱 Capítulo 8: Consistência, Objetinhos e Objetões
+
+> *"Um objeto sem construtor rico é como um bruxo sem espada: está pronto no papel, mas não serve para nada na caçada."*
+
+Neste capítulo saímos dos princípios SOLID e entramos em boas práticas de **consistência de objetos** — como garantir que objetos nasçam válidos, permaneçam válidos e se comuniquem de forma segura.
+
+Visitando a pasta `capitulo8_consistencia`, exploramos 9 versões organizadas em três camadas:
+
+### 📂 livro_original — Os Exemplos do Aniche
+Código fiel ao livro, com as classes originais (`Pedido`, `CPF`, `AlunoComTinyTypes`, `EnderecoImutavel`).
+Ponto de partida para entender o conceito antes de ver a versão Witcher.
+
+### 📂 v1 — Construtor Rico
+O construtor é o guardião do estado inicial. Se um objeto pode nascer sem seus atributos essenciais, ele nasce como uma armadilha.
+* **Problema:** `MissaoSemConstrutorRico` — nasce sem monstro, sem cliente, sem recompensa. `NullPointerException` garantido.
+* **Solução:** `Missao` exige os atributos no construtor. Impossível criar uma missão inválida.
+* **Bônus:** Dois construtores — um completo, um com `NivelDePerigo.MEDIO` como padrão.
+
+### 📂 v2 — Validando Dados
+Aniche separa dois tipos de validação e oferece quatro abordagens:
+* **Validação de formato** (campo vazio, e-mail sem `@`) → vai no **Controller**, antes de chegar ao domínio.
+* **Validação de negócio** (credencial com formato específico) → vai no **domínio**.
+
+| Abordagem | Quando usar |
+| :--- | :--- |
+| Construtor com `throw` | Objeto simples, regra única, falha imediata |
+| Método `valida()` | Objeto precisa existir antes de ser validado |
+| Builder com resultado rico | Separar validação do domínio, retornar lista de erros |
+| Validador composto (Chain) | Múltiplas regras intercambiáveis por contexto |
+
+### 📂 v3 — Teorema do Bom Vizinho e Null Object
+> *"O que seria do mundo se ninguém nunca passasse nulo para sua classe?"*
+
+* **Problema:** `ServicoDeContratoComNulos` — cheio de `if (cacador != null)` espalhados.
+* **Solução:** `CacadorDesconhecido` implementa a mesma interface com comportamento neutro. O serviço nunca recebe `null` — recebe um objeto que sabe se comportar.
+* **Regra:** O chamador é o bom vizinho. Se não tem caçador real, passa `new CacadorDesconhecido()`, nunca `null`.
+
+### 📂 v4 — Tiny Types
+Quando um construtor tem vários parâmetros do mesmo tipo primitivo, o compilador não avisa se você trocar a ordem.
+* **Problema:** `new CacadorSemTinyTypes("Escola do Lobo", "Geralt", ...)` — nome e escola invertidos, compila sem erro.
+* **Solução:** `NomeDeGuerra`, `EscolaDeCaca`, `EmailDeCacador`, `NivelDeExperiencia` — cada parâmetro tem seu tipo. Inversão não compila.
+* **Bônus:** Cada tiny type carrega sua própria validação (`NivelDeExperiencia(150)` lança exceção).
+
+### 📂 v5 — DTOs do Bem
+DTOs não são o problema — o problema é *só* ter DTOs (Modelo Anêmico).
+* **Uso correto:** Quando a tela precisa de dados de fontes diferentes que nenhuma classe de domínio representa sozinha.
+* **`ResumoDeMissaoDTO`** agrega dados do caçador, da missão e valores calculados. O `MontadorDeResumo` faz a conversão domínio → DTO em um único lugar.
+
+### 📂 v6 — Imutabilidade
+Classes imutáveis eliminam uma categoria inteira de bugs: modificações inesperadas em objetos compartilhados.
+* **Problema:** `LocalizacaoMutavel.moverPara()` altera o estado interno — quem tinha referência ao objeto vê outro lugar.
+* **Solução:** `LocalizacaoImutavel` — toda "mudança" retorna uma nova instância. Original sempre intacta.
+* **Lista protegida:** `getAvistamentos()` retorna `Collections.unmodifiableList()` — ninguém modifica por fora.
+* **Referência:** `LocalDate`, `LocalDateTime`, `String` do Java seguem exatamente esse padrão.
+
+### 📂 v7 — Classes Feias por Natureza
+Algumas classes **nasceram para ser feias**: Controllers, Factories, Adapters.
+* `FabricaDeMissao` é procedural, cheia de `ifs` e conversões de tipo — e isso é **normal e esperado**.
+* A moral: mantenha o feio **estável e nas pontas**. O domínio deve ser limpo. A fábrica raramente muda.
+
+### 📂 v8 — Nomenclatura
+Nomes são o principal instrumento de comunicação no código.
+* Verbos para métodos: `calcular`, `buscar`, `validar`
+* Substantivos para classes: `CalculadorDeTaxa`, `RepositorioDeContratos`
+* Prefixos para booleanos: `isAtivo`, `podeConcluir`, `temContrato`
+* Plural para coleções: `missoesDisponiveis`, `cacadoresAtivos`
+
+### 📂 v9 — Mundo Real (Sistema de Registro do Continente)
+Aplicação integrada de todos os conceitos em um sistema de cadastro de caçadores da Guilda.
+* `Cacador` — construtor rico + tiny types + lista imutável
+* `CadastroDeGuilda` — valida antes de criar, retorna `Optional` em vez de `null`
+* `FichaDeCacadorDTO` — DTO para exibição, montado pelo próprio domínio
+* `ResultadoDeRegistro` — objeto de resultado rico (sucesso ou falha com erros detalhados)
+
+### 🎯 Conceitos Chave do Capítulo
+
+**Construtor Rico:**
+> Se o objeto possui atributos sem os quais ele não pode viver, exija-os no construtor. Construtores são contratos.
+
+**Bom Vizinho:**
+> Nunca passe `null`. Se não tem o objeto real, passe um Null Object. A responsabilidade é do chamador.
+
+**Tiny Types:**
+> O compilador é seu aliado. Tipos específicos documentam a intenção e impedem inversões silenciosas.
+
+**Imutabilidade:**
+> Objetos que não mudam não surpreendem. Prefira `final`, sem setters, operações que retornam nova instância.
+
+**Modelo Rico vs. Anêmico:**
+> O problema não é ter DTOs, mas sim *só* ter DTOs. Lógica de negócio pertence ao domínio, não a classes de serviço procedurais.
+
+---
+
 ## 📊 Resumo dos Princípios SOLID Abordados
 
 | Sigla | Princípio | Capítulo | Aplicação |
@@ -374,6 +467,17 @@ oo-solid-ninjas/
 │   │   │   ├── v3_tributavel/
 │   │   │   ├── v4_repositorio_fabrica/
 │   │   │   └── v5_mundo_real/
+│   │   ├── capitulo8_consistencia/     # Consistência de Objetos
+│   │   │   ├── livro_original/         # Exemplos fiéis ao livro
+│   │   │   ├── v1_construtor_rico/
+│   │   │   ├── v2_validacao/
+│   │   │   ├── v3_bom_vizinho/
+│   │   │   ├── v4_tiny_types/
+│   │   │   ├── v5_dto/
+│   │   │   ├── v6_imutabilidade/
+│   │   │   ├── v7_classes_feias/
+│   │   │   ├── v8_nomenclatura/
+│   │   │   └── v9_mundo_real/
 │   │   └── infra/                      # Utilitários (Console UTF-8)
 │   └── test/java/
 │       ├── capitulo2_coesao/           # Testes unitários do Cap. 2
@@ -382,7 +486,15 @@ oo-solid-ninjas/
 │       │   └── v6_calculadora_strategy_map/ # Testes de Integração Spring
 │       ├── capitulo5_encapsulamento/   # Testes de Encapsulamento
 │       ├── capitulo6_heranca_composicao/ # Testes de Herança e LSP
-│       └── capitulo7_interfaces_magras/ # Testes de ISP
+│       ├── capitulo7_interfaces_magras/ # Testes de ISP
+│       └── capitulo8_consistencia/     # Testes de Consistência
+│           ├── livro_original/
+│           ├── v1_construtor_rico/
+│           ├── v2_validacao/
+│           ├── v3_bom_vizinho/
+│           ├── v4_tiny_types/
+│           ├── v6_imutabilidade/
+│           └── v9_mundo_real/
 └── README.md
 ```
 
@@ -418,6 +530,9 @@ oo-solid-ninjas/
 
 # Capítulo 7 - Interfaces Magras (ISP)
 ./gradlew run --args="capitulo7_interfaces_magras.SimuladorDeInterfaces"
+
+# Capítulo 8 - Consistência de Objetos
+./gradlew run --args="capitulo8_consistencia.SimuladorDeConsistencia"
 ```
 
 ### Executar os Testes
@@ -433,6 +548,7 @@ oo-solid-ninjas/
 ./gradlew test --tests "capitulo5_encapsulamento.*"
 ./gradlew test --tests "capitulo6_heranca_composicao.*"
 ./gradlew test --tests "capitulo7_interfaces_magras.*"
+./gradlew test --tests "capitulo8_consistencia.*"
 
 # Teste arquitetural (ArchUnit)
 ./gradlew test --tests "capitulo3_acoplamento.ArquiteturaTest"
