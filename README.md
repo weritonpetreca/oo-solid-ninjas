@@ -413,15 +413,92 @@ Aplicação integrada de todos os conceitos em um sistema de cadastro de caçado
 
 ---
 
+## 🦠 Capítulo 9: Maus Cheiros de Design
+
+> *"Todo bruxo aprende a identificar rastros de monstros. Todo desenvolvedor precisa aprender a identificar rastros de código ruim — antes que o monstro se manifeste em produção."*
+
+Neste capítulo saímos dos princípios SOLID e aprendemos a **nomear e reconhecer más práticas**. Reconhecer um problema pelo nome é o primeiro passo para comunicá-lo e corrigi-lo.
+
+Visitando a pasta `capitulo9_maus_cheiros`, exploramos 7 versões organizadas em três camadas:
+
+### 📂 livro_original — Os Exemplos do Aniche
+Código fiel ao livro com as classes originais (`NotaFiscal`, `Gerenciador`, `AliquotaDeImposto`).
+Ponto de partida para ver o smell com as classes exatas descritas por Aniche.
+
+### 📂 v1 — Refused Bequest
+> *"Bequest" = herança/legado. "Refused" = recusado.*
+
+Ocorre quando uma subclasse herda de uma classe pai mas **não quer** honrar parte dos métodos herdados.
+* **Problema:** `EscolaDeAlquimiaComSmell extends EscolaDeGuerraBase` — lança `UnsupportedOperationException` em `treinarCombate()`, violando o LSP.
+* **Solução:** Interface `Escola` com o mínimo comum. `EscolaDeGuerraReal` e `EscolaDeAlquimiaReal` implementam apenas o que faz sentido para cada uma.
+
+### 📂 v2 — Feature Envy
+Um método mais interessado nos dados de **outro objeto** do que nos da própria classe.
+* **Problema:** `ProcessadorDeContratosComSmell.processarContrato()` só usa dados de `ContratoDeCaca` — o método está no lugar errado.
+* **Solução:** `ContratoDeCaca.processar()` — o comportamento vive onde os dados vivem. O processador apenas delega.
+
+### 📂 v3 — Intimidade Inapropriada
+Uma classe que **conhece e manipula os detalhes internos** de outra, fazendo perguntas sobre o estado para tomar decisões que deveriam estar dentro do objeto interrogado.
+* **Problema:** `GerenciadorDeMissoesComSmell` pergunta `missao.isEncerrada() && missao.getValor() > 5000` para então decidir marcar como urgente.
+* **Solução:** `missao.encerrar()` encapsula a regra. *Tell, don't ask.*
+
+### 📂 v4 — God Class
+A classe que **faz tudo** — controla muitos objetos, acumula responsabilidades, cresce indefinidamente.
+* **Problema:** `GuildaDoContienenteGodClass` cadastra caçadores, cria contratos, calcula imposto, processa pagamentos, envia notificações e gera relatórios.
+* **Solução:** `RegistroDeCacadores`, `GestorDeContratos`, `CalculadorDeImpostoGuilda`, `TesouroDaGuilda`, `ServicoDeNotificacao` — cada um com uma responsabilidade. `GuildaCoordenadora` apenas orquestra.
+
+### 📂 v5 — Divergent Changes
+Uma classe que **muda por muitas razões diferentes**. O sintoma aparece no histórico de commits: a mesma classe alterada por motivos completamente distintos.
+* **Problema:** `ProcessadorDeMissaoDivergente` calcula imposto, gera relatório, notifica e classifica monstros — quatro razões para mudar.
+* **Solução:** `CalculadorDeImpostoMissao`, `GeradorDeRelatorioMissao`, `ClassificadorDeMonstro` — uma classe, uma razão para mudar.
+
+### 📂 v6 — Shotgun Surgery
+O inverso do Divergent Changes. Uma única mudança de negócio exige **editar muitos arquivos** ao mesmo tempo.
+* **Problema:** Taxa da Guilda (`0.15`) hardcoded em `ProcessadorDeContrato`, `RelatorioDeContrato`, `AuditoriaDeContrato` e mais 5 lugares.
+* **Solução:** `TaxaDaGuilda` centraliza o conceito. Mudar a taxa = alterar um único lugar.
+
+### 📂 v7 — Mundo Real (A Auditoria de Triss Merigold)
+O sistema legado da Guilda concentrava **todos os seis smells**. A versão refatorada distribui responsabilidades corretamente.
+
+| Smell identificado | Solução aplicada |
+| :--- | :--- |
+| **God Class** | `ServicoDeRecompensa`, `RelatorioDeGuilda`, `TaxaDaGuilda` |
+| **Refused Bequest** | `CacadorMago implements Cacador, Feiticeiro` (sem herdar de `CacadorDeGuerra`) |
+| **Feature Envy** | `missao.concluir()`, `missao.descricaoCompleta()` |
+| **Intimidade Inapropriada** | `missao.encerrar()` — Tell, don't ask |
+| **Divergent Changes** | `RelatorioDeGuilda` separado da lógica de missão |
+| **Shotgun Surgery** | `TaxaDaGuilda` centralizada |
+
+### 🎯 Conceitos Chave do Capítulo
+
+**Refused Bequest:**
+> A subclasse não pode exigir mais nem entregar menos que o pai. Se ela recusa métodos herdados, a herança está errada.
+
+**Feature Envy:**
+> Se um método usa mais `outraClasse.getX()` do que `this.x`, ele provavelmente está no lugar errado.
+
+**Intimidade Inapropriada:**
+> Não pergunte ao objeto para depois tomar uma decisão por ele. Diga a ele o que fazer — *Tell, don't ask*.
+
+**God Class:**
+> Uma classe que depende de 30 outras é frágil. Qualquer dependência pode forçar mudanças nela.
+
+**Divergent Changes vs. Shotgun Surgery:**
+> Divergent Changes → 1 classe, N razões para mudar. Shotgun Surgery → 1 razão para mudar, N classes afetadas.
+
+---
+
 ## 📊 Resumo dos Princípios SOLID Abordados
 
 | Sigla | Princípio | Capítulo | Aplicação |
 | :---: | :--- | :---: | :--- |
-| **S** | Single Responsibility | 2 | Classes de regra separadas, cada uma com uma única razão para mudar |
+| **S** | Single Responsibility | 2, 9 | Classes de regra separadas; God Class e Divergent Changes são o SRP violado |
 | **O** | Open/Closed | 4 | Calculadora aberta para extensão (novas tabelas/fretes) sem modificação |
-| **L** | Liskov Substitution | 2, 4, 6 | Subclasses podem substituir a classe base sem quebrar o sistema |
+| **L** | Liskov Substitution | 2, 4, 6, 9 | Subclasses podem substituir a classe base sem quebrar o sistema; Refused Bequest é o LSP violado |
 | **I** | Interface Segregation | 2, 7 | Interfaces magras (`Tributavel`, `DadosParaCalculo`) evitam acoplamento inútil |
 | **D** | Dependency Inversion | 3, 4, 7 | Dependemos de abstrações (interfaces), não de implementações concretas |
+
+> **Caps 8 e 9** não introduzem novos princípios SOLID — aprofundam boas práticas de design (consistência de objetos, imutabilidade, tiny types) e ensinam a nomear e reconhecer más práticas (code smells). São a aplicação prática de tudo que foi aprendido nos capítulos anteriores.
 
 ---
 
@@ -478,6 +555,15 @@ oo-solid-ninjas/
 │   │   │   ├── v7_classes_feias/
 │   │   │   ├── v8_nomenclatura/
 │   │   │   └── v9_mundo_real/
+│   │   ├── capitulo9_maus_cheiros/     # Maus Cheiros de Design
+│   │   │   ├── livro_original/         # Exemplos fiéis ao livro
+│   │   │   ├── v1_refused_bequest/
+│   │   │   ├── v2_feature_envy/
+│   │   │   ├── v3_intimidade_inapropriada/
+│   │   │   ├── v4_god_class/
+│   │   │   ├── v5_divergent_changes/
+│   │   │   ├── v6_shotgun_surgery/
+│   │   │   └── v7_mundo_real/
 │   │   └── infra/                      # Utilitários (Console UTF-8)
 │   └── test/java/
 │       ├── capitulo2_coesao/           # Testes unitários do Cap. 2
@@ -487,14 +573,23 @@ oo-solid-ninjas/
 │       ├── capitulo5_encapsulamento/   # Testes de Encapsulamento
 │       ├── capitulo6_heranca_composicao/ # Testes de Herança e LSP
 │       ├── capitulo7_interfaces_magras/ # Testes de ISP
-│       └── capitulo8_consistencia/     # Testes de Consistência
+│       ├── capitulo8_consistencia/     # Testes de Consistência
+│       │   ├── livro_original/
+│       │   ├── v1_construtor_rico/
+│       │   ├── v2_validacao/
+│       │   ├── v3_bom_vizinho/
+│       │   ├── v4_tiny_types/
+│       │   ├── v6_imutabilidade/
+│       │   └── v9_mundo_real/
+│       └── capitulo9_maus_cheiros/     # Testes de Maus Cheiros
 │           ├── livro_original/
-│           ├── v1_construtor_rico/
-│           ├── v2_validacao/
-│           ├── v3_bom_vizinho/
-│           ├── v4_tiny_types/
-│           ├── v6_imutabilidade/
-│           └── v9_mundo_real/
+│           ├── v1_refused_bequest/
+│           ├── v2_feature_envy/
+│           ├── v3_intimidade_inapropriada/
+│           ├── v4_god_class/
+│           ├── v5_divergent_changes/
+│           ├── v6_shotgun_surgery/
+│           └── v7_mundo_real/
 └── README.md
 ```
 
@@ -533,6 +628,9 @@ oo-solid-ninjas/
 
 # Capítulo 8 - Consistência de Objetos
 ./gradlew run --args="capitulo8_consistencia.SimuladorDeConsistencia"
+
+# Capítulo 9 - Maus Cheiros de Design
+./gradlew run --args="capitulo9_maus_cheiros.SimuladorDeMausCheiros"
 ```
 
 ### Executar os Testes
@@ -549,6 +647,7 @@ oo-solid-ninjas/
 ./gradlew test --tests "capitulo6_heranca_composicao.*"
 ./gradlew test --tests "capitulo7_interfaces_magras.*"
 ./gradlew test --tests "capitulo8_consistencia.*"
+./gradlew test --tests "capitulo9_maus_cheiros.*"
 
 # Teste arquitetural (ArchUnit)
 ./gradlew test --tests "capitulo3_acoplamento.ArquiteturaTest"
