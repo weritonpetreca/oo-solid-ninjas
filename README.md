@@ -52,47 +52,13 @@ Combatemos o micro-gerenciamento e a "Intimidade Indesejada".
 
 ---
 
-## 📜 O Grande Debate: Passar o Objeto ou o Valor?
-
-Durante o concílio dos bruxos (clube de leitura), surgiu um debate interessante sobre o método `calcula()`. Como devemos passar os dados para a regra?
-
-### As Opções na Mesa:
-
-| Abordagem | Vantagem (Luz) | Desvantagem (Sombra) |
-| :--- | :--- | :--- |
-| **Apenas Valor**<br>`calcula(double salario)` | **Desacoplamento.** A regra vira matemática pura. Não sabe o que é um funcionário. | **Rigidez.** Se a regra mudar (ex: depender de "Tempo de Casa"), quebramos todos os contratos. |
-| **Objeto Completo**<br>`calcula(Funcionario f)` | **Extensibilidade.** Se a regra mudar, o objeto já tem os dados. O contrato não quebra. | **Risco.** A regra ganha acesso a métodos que não deveria (ex: `getSenha`, `getPedidos`), podendo causar problemas com ORM/Banco. |
-
-### 🛡️ O Veredito do Mestre (A Solução v4)
-Para resolver esse impasse, aplicamos o **Interface Segregation Principle (ISP)**.
-
-Criamos uma interface "Máscara" (`DadosParaCalculo`) que expõe *apenas* o salário e o cargo.
-- O `Funcionario` veste essa máscara.
-- A regra só vê a máscara.
-- O código fica **seguro** (sem acesso indevido) e **extensível**.
-
----
-
-## 🏰 A Visão do Futuro: Arquitetura Hexagonal e Clean Architecture
-
-O Capítulo 3 consolida a visão de arquiteturas avançadas, como a **Hexagonal (Ports and Adapters)** e a **Clean Architecture**.
-
-Ao separar a `RegraDeCalculo` (Lógica de Negócio) da `Calculadora/Controller` (Fluxo), nós isolamos o **Domínio**.
-
-* **No mundo Procedural:** A lógica de negócio está suja com SQL, Tela e HTTP. Se você troca o banco, a regra quebra.
-* **No mundo do Bruxo (Hexagonal):** O Domínio (Kaer Morhen) fica no centro, protegido. O Banco de Dados e a Web são apenas "detalhes" externos (monstros ou clientes) que se conectam através de portões (Interfaces).
-
-**Conclusão:** Praticar o SRP, a Coesão e o DIP é o primeiro passo para construir fortalezas impenetráveis.
-
----
-
 ## 🔓 Capítulo 4: Classes Abertas e o Tal do OCP
 
 > *"Um Bruxo não muda o feitiço toda vez que encontra um novo monstro. Ele aprende novos feitiços. O livro de feitiços está aberto para extensão, mas cada feitiço já escrito está fechado para modificação."*
 
 O **Open/Closed Principle (OCP)** é o segundo dos princípios SOLID. Este capítulo ensina como fazer o sistema evoluir sem precisar mexer no que já funciona.
 
-Visitando a pasta `capitulo4_ocp`, você verá a evolução em 4 estágios:
+Visitando a pasta `capitulo4_ocp`, você verá a evolução retratada pelo livro em 4 estágios:
 
 ### 📂 v1 — O Problema Original (A Calculadora Rígida)
 A `CalculadoraDePrecos` instancia suas dependências diretamente (`new TabelaDePrecoPadrao()`, `new Frete()`).
@@ -278,45 +244,47 @@ Aplicação completa unindo Herança e Composição em cenário de RPG.
 
 ## ⚖️ Capítulo 7: Interfaces Magras e o tal do ISP
 
-> *"Uma espada de duas mãos é inútil para um ladino que precisa de uma adaga. Não force uma classe a carregar o peso de métodos que ela não usa."*
+> *"Uma espada de duas mãos é inútil para um ladino que precisa de uma adaga. Não force uma classe a carregar o peso de um arsenal que ela não sabe usar."*
 
-O **Interface Segregation Principle (ISP)** prega que interfaces devem ser coesas e específicas.
+O **Interface Segregation Principle (ISP)** prega que interfaces devem ser coesas, focadas e específicas. Neste capítulo, entendemos que obrigar classes a implementar métodos que não fazem sentido é uma armadilha mortal para o design do software.
 
 Visitando a pasta `capitulo7_interfaces_magras`, exploramos 5 versões:
 
-### 📂 v1 — Interface Gorda (Fat Interface)
-A interface `Imposto` obrigava a implementar `geraNota()` e `imposto()`.
-* **Problema:** O imposto `IXMX` não gera nota.
-* **Gambiarra:** A classe `IXMX` lança `NaoGeraNotaException` ou retorna `null`. Isso polui o código.
+### 📂 v1 — A Armadura Pesada (Interface Gorda)
+Uma única interface `Imposto` tentava fazer duas coisas: calcular valor e gerar nota fiscal.
+* **Problema:** O imposto `IXMX` (um imposto menor) não gera nota fiscal. Mas ele é forçado a implementar o método `geraNota()`.
+* **A Gambiarra:** O desenvolvedor acaba jogando a toalha e escrevendo `throw new NaoGeraNotaException()` dentro do método. O sistema fica poluído e propenso a quebrar.
 
-### 📂 v2 — Interfaces Coesas
-Dividimos a interface gorda em duas magras: `CalculadorDeImposto` e `GeradorDeNota`.
-* **Resultado:** `ISS` implementa ambas. `IXMX` implementa apenas `CalculadorDeImposto`. Ninguém é forçado a mentir.
+### 📂 v2 — O Arsenal Dividido (Interfaces Coesas)
+Em vez de uma espada de duas mãos, criamos duas espadas de uma mão.
+* **Solução:** Separamos em duas interfaces: `CalculadorDeImposto` e `GeradorDeNota`.
+* **Resultado:** O imposto `ISS` implementa as duas. O imposto `IXMX` implementa apenas a de cálculo. Ninguém é forçado a mentir no código.
 
-### 📂 v3 — Interface Mínima (Tributável)
-Em vez de o `CalculadorDeImposto` depender da classe gigante `NotaFiscal`, ele depende da interface mínima `Tributavel`.
-* **Ganho:** Desacoplamento. Podemos calcular imposto de qualquer coisa (Carro, Casa, Serviço) desde que implemente `Tributavel`.
+### 📂 v3 — O Foco da Caçada (Interface Mínima)
+Uma classe que calcula imposto não precisa saber a cor, o tamanho e o dono de uma `NotaFiscal`. Ela só precisa saber que o item é tributável e qual o valor.
+* **Solução:** Criamos a interface `Tributavel`. O calculador de imposto agora pede um `Tributavel`, não uma `NotaFiscal` inteira.
+* **Vantagem:** O acoplamento cai drasticamente. Se amanhã o Rei decidir que cavalos pagam imposto, basta a classe `Cavalo` implementar `Tributavel`. O código de cálculo continua intacto (reutilização extrema).
 
-### 📂 v4 — Repositório e Fábrica
-Aplicamos interfaces para infraestrutura.
-* **Repositório:** `RepositorioDeFaturas` (Interface) esconde o banco de dados.
-* **Fábrica:** `FabricaDeCalculadora` centraliza a criação de objetos complexos.
+### 📂 v4 — O Contrato da Guilda (Repositório e Fábrica)
+Demonstramos como interfaces são vitais para separar regras de negócio da infraestrutura.
+* **Ação:** Em vez de depender do Banco de Dados direto (`FaturaDao`), a classe depende da interface `RepositorioDeFaturas`.
+* **Benefício:** Você pode testar suas regras usando um repositório em memória falso (Mocks), sem subir um banco MySQL de verdade.
 
-### 📂 v5 — Exemplo Real (Sistema de Notificações)
-Um sistema onde canais de notificação (Email, SMS, Slack) são plugáveis.
-* **Interfaces Magras:** `Notificavel` (quem recebe) e `CanalDeNotificacao` (quem envia).
-* **Composição:** O `ServicoDeNotificacao` recebe uma lista de canais e dispara para todos.
+### 📂 v5 — O Mundo Real (Sistema de Notificações)
+Aplicamos o ISP em um serviço de mensagens do Continente.
+* **Interfaces Magras:** `Notificavel` (qualquer pessoa que pode receber um aviso) e `CanalDeNotificacao` (qualquer meio de envio: coruja, mago, carta).
+* **Resultado:** O `ServicoDeNotificacao` pode enviar mensagens para qualquer entidade usando qualquer canal. Uma composição perfeita e flexível.
 
 ### 🎯 Conceitos Chave do Capítulo
 
 **Interface Segregation Principle (ISP):**
-> Clientes não devem ser forçados a depender de métodos que não usam.
+> "Nenhum cliente deve ser forçado a depender de métodos que não usa." — Robert C. Martin (Uncle Bob)
 
 **Coesão de Interface:**
-> Uma interface deve ter uma única responsabilidade. Se ela faz duas coisas (calcula imposto E gera nota), ela deve ser quebrada.
+> Se sua interface tem métodos não relacionados, ela está gorda. Divida para conquistar.
 
-**Interface Mínima:**
-> Ao definir um parâmetro de método, peça o mínimo necessário (`Tributavel`), não o objeto inteiro (`NotaFiscal`).
+**O Poder da Interface Mínima:**
+> Peça o mínimo que você precisa para fazer o trabalho. Se você só precisa do valor para calcular o imposto, peça uma interface que retorne o valor, não o objeto banco de dados inteiro.
 
 ---
 
@@ -488,6 +456,120 @@ O sistema legado da Guilda concentrava **todos os seis smells**. A versão refat
 
 ---
 
+## 📊 Capítulo 10: Métricas de Código
+
+> *"Todo bruxo sabe que um monstro de 3 metros é perigoso. Mas como você mede se o seu código é 'grande demais'? É para isso que existem as métricas."*
+
+Neste capítulo, saímos dos princípios e das práticas para entrar no mundo das **heurísticas numéricas**. Métricas de código não dizem com certeza se algo está errado — elas funcionam como um **filtro**, apontando para onde olhar primeiro.
+
+Visitando a pasta `capitulo10_metricas`, exploramos 5 versões:
+
+### 📂 v1 — Complexidade Ciclomática (CC)
+Mede o número de caminhos independentes em um método.
+* **Fórmula:** CC = desvios (`if`, `for`, `while`) + 1.
+* **Problema:** `EstrategiasDeCacaComAltaCC` tem CC = 12.
+* **Solução:** Polimorfismo reduz o método `decidir()` para CC = 1.
+
+| Faixa de CC | Avaliação |
+| :--- | :--- |
+| 1–3 | ✅ Excelente |
+| 4–5 | 🟡 Aceitável |
+| > 10 | 🔴 Refatora urgente |
+
+### 📂 v2 — Tamanho de Métodos e Classes
+Métricas como **NOA** (atributos), **NOM** (métodos), **NOP** (parâmetros) e **LOC** (linhas) ajudam a identificar classes gigantes.
+* **Problema:** `RegistroDeGuildaGigante` viola todos os limites.
+* **Solução:** Refatoração em classes menores e coesas.
+
+### 📂 v3 — Coesão e a LCOM
+**LCOM (Lack of Cohesion of Methods)** mede o quão relacionados são os métodos de uma classe.
+* **LCOM = 0** → máxima coesão (todos os métodos usam os mesmos atributos).
+* **LCOM = 1** → mínima coesão (grupos de métodos independentes → divida a classe!).
+
+### 📂 v4 — Acoplamento Aferente (CA) e Eferente (CE)
+* **CE (Eferente):** Quantas classes esta classe **DEPENDE**. Alto CE instável = frágil.
+* **CA (Aferente):** Quantas classes **DEPENDEM** desta. Alto CA = estável.
+* **Solução:** Depender de interfaces (estáveis) em vez de classes concretas (instáveis).
+
+### 📂 v5 — Mundo Real (Sistema de Análise de Qualidade)
+Um sistema que calcula todas as métricas para um projeto e gera um relatório de qualidade, classificando o sistema como ÓTIMO, BOM, ATENÇÃO ou CRÍTICO.
+
+### 🎯 Regra de Ouro
+
+| Métrica | Problema | Cap. anterior que ensina a solução |
+| :--- | :--- | :--- |
+| **CC alto** | Muitos caminhos → difícil de testar | Cap. 4 (OCP + polimorfismo) |
+| **NOA alto** | Muitos atributos → God Class | Cap. 2 (SRP), Cap. 9 (Divergent Changes) |
+| **LCOM alto** | Dois grupos independentes → dividir | Cap. 2 (SRP), Cap. 9 (Divergent Changes) |
+| **CE alto instável** | Frágil → quebra com qualquer mudança | Cap. 3 (DIP) |
+| **NOP alto** | Construtor monstruoso | Cap. 8 (Tiny Types, Builder) |
+
+> *"As métricas são filtros, não oráculos. Elas não dizem com 100% de certeza que algo está errado — elas dizem onde olhar primeiro."* — Maurício Aniche
+
+---
+
+## 🔬 Capítulo 11: Exemplo Prático — MetricMiner
+
+> *"Preste muita atenção a cada decisão tomada. Olhe cada classe e pense se ela está coesa, como ela está acoplada, se as abstrações são coesas e estáveis. O código, em particular, é o menos importante aqui."* — Maurício Aniche
+
+Neste capítulo, Aniche para de descrever princípios e **mostra um sistema real** — o MetricMiner. Para este estudo, consolidamos todo o aprendizado em uma **arquitetura final e profissional** no pacote `witcherminer`.
+
+### 🐺 O WitcherMiner: A Arquitetura Final
+A versão Witcher espelha fielmente cada decisão do MetricMiner no contexto da Guilda do Continente:
+
+| MetricMiner | WitcherMiner | Análogo a |
+| :--- | :--- | :--- |
+| `Study` | `EstudoDaGuilda` | Interface do pesquisador |
+| `SCM` | `ArquivoDeContratos` | Fonte dos dados |
+| `Commit` | `ContratoRegistrado` | Registro completo |
+| `CommitVisitor` | `VisitanteDeContrato` | Regra de análise |
+| `PersistenceMechanism` | `MecanismoDePersistencia` | Destino de saída |
+| `ClassLevelMetricFactory` | `FabricaDeMetrica` | Cria métricas sem vazar estado |
+
+### 🔑 Decisões de Design Discutidas por Aniche
+* **Fábrica de Métricas:** Garante que cada análise use uma nova instância da métrica, evitando que o estado de uma contamine a outra.
+* **Pontos de Extensão:** O sistema é aberto para extensão em 5 pontos (SCM, SCMRepository, Métricas, Estudos, Visitantes), todos seguindo DIP + OCP.
+* **Separação de Pacotes:** A estrutura (`domain`, `ports`, `adapters`) é a Arquitetura Hexagonal em escala de pacote.
+
+### 🧪 Testabilidade Como Consequência do Design
+O design do MetricMiner é **trivialmente testável**:
+* **Visitantes** testados com implementações fake (lambdas).
+* **Fábricas** testadas verificando a criação de novas instâncias.
+* **Integração** validada com um repositório fake em memória.
+
+---
+
+## 🏆 Capítulo 12: Conclusão — A Jornada Completa
+
+> *"Fazer um bom projeto de classes orientado a objeto não é fácil. É muita coisa para pensar."* — Maurício Aniche
+
+O último capítulo não tem código novo no livro. É uma reflexão. Uma chamada para a prática. Aqui, a versão Witcher o implementa como o culminar de toda a jornada: uma única classe, `BruxoDoContinente`, que sintetiza **todos os princípios** aprendidos, com cada decisão rastreada ao capítulo que a ensinou.
+
+### 🗺️ O Mapa da Jornada: Anatomia de um Bruxo Lendário
+A classe `BruxoDoContinente` é o nosso troféu final. Cada linha de código nela é uma lição aprendida.
+
+| Capítulo | Princípio / Conceito | Aplicado em `BruxoDoContinente` |
+| :--- | :--- | :--- |
+| **1** | OO Mindset | Estado (`nome`, `localizacao`) + comportamento (`registrarMissao`) juntos |
+| **2** | SRP | Uma responsabilidade: representar um caçador e seu histórico |
+| **3** | DIP | Depende de `CalculadorDeTaxa` e `InformacaoDeContato` — interfaces |
+| **4** | OCP | Nova taxa? Crie `TaxaEspecial`. Não toca na classe `BruxoDoContinente` |
+| **5** | Encapsulamento | Lista de missões como `unmodifiableList`; estado interno protegido |
+| **6** | LSP / Composição | "Tem um" `CalculadorDeTaxa` — não herda taxa de nenhuma superclasse |
+| **7** | ISP | Implementa `Tributavel` — interface mínima com um único método |
+| **8** | Consistência | Tiny Types, Construtor Rico, Imutabilidade, Null Object (`ContatoDesconhecido`) |
+| **9** | Maus Cheiros | Ausência de God Class, Feature Envy, Shotgun Surgery, LCOM baixo |
+| **10** | Métricas | CC ≤ 5, NOA = 7, LCOM baixo, CE ≤ 5 com interfaces estáveis |
+| **11** | Framework | Plugável como `VisitanteDeContrato` no WitcherMiner |
+
+### 🎯 A Mensagem Final
+Três pilares que atravessam todos os 12 capítulos:
+**1. Coesão** — Classes com responsabilidades bem definidas. Uma razão para mudar.
+**2. Acoplamento** — Dependências pensadas e estáveis. Programe para interfaces.
+**3. Encapsulamento** — Esconda o COMO. Exponha o QUÊ. Objetos que protegem seu estado.
+
+---
+
 ## 📊 Resumo dos Princípios SOLID Abordados
 
 | Sigla | Princípio | Capítulo | Aplicação |
@@ -510,86 +592,30 @@ oo-solid-ninjas/
 │   ├── main/java/
 │   │   ├── capitulo1_mindset/          # OO vs Procedural
 │   │   ├── capitulo2_coesao/           # SRP e Strategy Pattern
-│   │   │   ├── v1_a_maldicao_god_class/
-│   │   │   ├── v2_o_sinal_strategy/
-│   │   │   ├── v3_o_elixir_enum/
-│   │   │   └── v4_a_mascara_isp/
 │   │   ├── capitulo3_acoplamento/      # DIP e Arquitetura Hexagonal
-│   │   │   ├── v1_acoplamento_concreto/
-│   │   │   ├── v2_inversao_dependencia/
-│   │   │   └── v3_dip_completo/
 │   │   ├── capitulo4_ocp/              # Open/Closed Principle
-│   │   │   ├── v1_o_problema/
-│   │   │   ├── v2_o_problema_dos_ifs/
-│   │   │   ├── v3_calculadora_aberta/
-│   │   │   ├── v4_exemplo_real/
-│   │   │   ├── v5_calculadora_factory/ # Factory Pattern
-│   │   │   └── v6_calculadora_strategy_map/ # Spring Strategy Map
 │   │   ├── capitulo5_encapsulamento/   # Encapsulamento e Tell Don't Ask
-│   │   │   ├── v1_problema_encapsulamento/
-│   │   │   ├── v2_intimidade_inapropriada/
-│   │   │   ├── v3_lei_de_demeter/
-│   │   │   ├── v4_solucao_completa/
-│   │   │   └── v5_modelo_anemico/
 │   │   ├── capitulo6_heranca_composicao/ # LSP e Herança vs Composição
-│   │   │   ├── v1_lsp_violacao/
-│   │   │   ├── v2_lsp_quadrado_retangulo/
-│   │   │   ├── v3_acoplamento_pai_filho/
-│   │   │   ├── v4_composicao/
-│   │   │   ├── v5_heranca_dsl/
-│   │   │   └── v6_mundo_real/
 │   │   ├── capitulo7_interfaces_magras/ # ISP e Interfaces Coesas
-│   │   │   ├── v1_interface_gorda/
-│   │   │   ├── v2_interfaces_coesas/
-│   │   │   ├── v3_tributavel/
-│   │   │   ├── v4_repositorio_fabrica/
-│   │   │   └── v5_mundo_real/
 │   │   ├── capitulo8_consistencia/     # Consistência de Objetos
-│   │   │   ├── livro_original/         # Exemplos fiéis ao livro
-│   │   │   ├── v1_construtor_rico/
-│   │   │   ├── v2_validacao/
-│   │   │   ├── v3_bom_vizinho/
-│   │   │   ├── v4_tiny_types/
-│   │   │   ├── v5_dto/
-│   │   │   ├── v6_imutabilidade/
-│   │   │   ├── v7_classes_feias/
-│   │   │   ├── v8_nomenclatura/
-│   │   │   └── v9_mundo_real/
 │   │   ├── capitulo9_maus_cheiros/     # Maus Cheiros de Design
-│   │   │   ├── livro_original/         # Exemplos fiéis ao livro
-│   │   │   ├── v1_refused_bequest/
-│   │   │   ├── v2_feature_envy/
-│   │   │   ├── v3_intimidade_inapropriada/
-│   │   │   ├── v4_god_class/
-│   │   │   ├── v5_divergent_changes/
-│   │   │   ├── v6_shotgun_surgery/
-│   │   │   └── v7_mundo_real/
+│   │   ├── capitulo10_metricas/        # Métricas de Código
+│   │   ├── capitulo11_metricminer/     # Estudo de Caso: MetricMiner
+│   │   │   └── witcherminer/           # Arquitetura final do projeto
+│   │   ├── capitulo12_conclusao/       # Conclusão e Síntese
 │   │   └── infra/                      # Utilitários (Console UTF-8)
 │   └── test/java/
 │       ├── capitulo2_coesao/           # Testes unitários do Cap. 2
 │       ├── capitulo3_acoplamento/      # Testes unitários + ArchUnit
 │       ├── capitulo4_ocp/              # Testes com Mocks e Integração
-│       │   └── v6_calculadora_strategy_map/ # Testes de Integração Spring
 │       ├── capitulo5_encapsulamento/   # Testes de Encapsulamento
 │       ├── capitulo6_heranca_composicao/ # Testes de Herança e LSP
 │       ├── capitulo7_interfaces_magras/ # Testes de ISP
 │       ├── capitulo8_consistencia/     # Testes de Consistência
-│       │   ├── livro_original/
-│       │   ├── v1_construtor_rico/
-│       │   ├── v2_validacao/
-│       │   ├── v3_bom_vizinho/
-│       │   ├── v4_tiny_types/
-│       │   ├── v6_imutabilidade/
-│       │   └── v9_mundo_real/
-│       └── capitulo9_maus_cheiros/     # Testes de Maus Cheiros
-│           ├── livro_original/
-│           ├── v1_refused_bequest/
-│           ├── v2_feature_envy/
-│           ├── v3_intimidade_inapropriada/
-│           ├── v4_god_class/
-│           ├── v5_divergent_changes/
-│           ├── v6_shotgun_surgery/
-│           └── v7_mundo_real/
+│       ├── capitulo9_maus_cheiros/     # Testes de Maus Cheiros
+│       ├── capitulo10_metricas/        # Testes de Métricas
+│       └── capitulo11_metricminer/     # Testes do WitcherMiner
+│           └── witcherminer/
 └── README.md
 ```
 
@@ -631,6 +657,15 @@ oo-solid-ninjas/
 
 # Capítulo 9 - Maus Cheiros de Design
 ./gradlew run --args="capitulo9_maus_cheiros.SimuladorDeMausCheiros"
+
+# Capítulo 10 - Métricas de Código
+./gradlew run --args="capitulo10_metricas.SimuladorDeMetricas"
+
+# Capítulo 11 - Estudo de Caso: MetricMiner
+./gradlew run --args="capitulo11_metricminer.SimuladorDoMetricMiner"
+
+# Capítulo 12 - Conclusão
+./gradlew run --args="capitulo12_conclusao.SimuladorFinal"
 ```
 
 ### Executar os Testes
@@ -640,14 +675,8 @@ oo-solid-ninjas/
 ./gradlew test
 
 # Testes de um capítulo específico
-./gradlew test --tests "capitulo2_coesao.*"
-./gradlew test --tests "capitulo3_acoplamento.*"
-./gradlew test --tests "capitulo4_ocp.*"
-./gradlew test --tests "capitulo5_encapsulamento.*"
-./gradlew test --tests "capitulo6_heranca_composicao.*"
-./gradlew test --tests "capitulo7_interfaces_magras.*"
-./gradlew test --tests "capitulo8_consistencia.*"
-./gradlew test --tests "capitulo9_maus_cheiros.*"
+./gradlew test --tests "capitulo11_metricminer.*"
+./gradlew test --tests "capitulo12_conclusao.*"
 
 # Teste arquitetural (ArchUnit)
 ./gradlew test --tests "capitulo3_acoplamento.ArquiteturaTest"

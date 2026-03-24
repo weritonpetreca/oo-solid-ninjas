@@ -24,4 +24,13 @@ class ArquivoHistoricoGuildaFakeTest {
         assertEquals("Geralt de Rívia", contrato.getCacador());
         assertEquals(3, contrato.getAcoes().size());
     }
+
+    @Test
+    @DisplayName("Deve retornar um contrato 'Desconhecido' para ID inválido")
+    void deveRetornarContratoDesconhecidoParaIdInvalido() {
+        var repo = new ArquivoHistoricoGuildaFake("Teste");
+        var contrato = repo.getContrato("ID_QUE_NAO_EXISTE");
+        assertEquals("Desconhecido", contrato.getCacador());
+        assertTrue(contrato.getAcoes().isEmpty());
+    }
 }

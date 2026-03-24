@@ -62,6 +62,6 @@ class CalculadoraDeMetricasDeCacadorTest {
         assertEquals("CTR-TESTE", valoresEscritos.get(1));
         assertEquals("Tester de Rívia", valoresEscritos.get(2));
         assertEquals("METRICA_TESTE", valoresEscritos.get(3));
-        assertEquals("0,8571", valoresEscritos.get(4)); // Verifica a formatação!
+        assertEquals("0.8571", valoresEscritos.get(4)); // Verifica a formatação!
     }
 }
